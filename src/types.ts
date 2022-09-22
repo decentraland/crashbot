@@ -16,9 +16,10 @@ export type GlobalContext = {
 export type BaseComponents = {
   config: IConfigComponent
   logs: ILoggerComponent
-  server: IHttpServerComponent<GlobalContext>
+  // server: IHttpServerComponent<GlobalContext>
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
+  bolt: IBaseComponent
 }
 
 // components used in runtime
