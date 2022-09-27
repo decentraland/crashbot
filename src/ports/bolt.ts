@@ -1,7 +1,11 @@
 import { IBaseComponent } from "@well-known-components/interfaces";
-import { App } from '@slack/bolt';
+import { App, PlainTextOption, ViewStateValue } from '@slack/bolt';
+import { AppComponents } from "../types";
+import SQL from "sql-template-strings";
 
-export async function createBoltComponent(): Promise<IBaseComponent> {
+export async function createBoltComponent(components: Pick<AppComponents, 'pg'>): Promise<IBaseComponent> {
+
+  const { pg } = components
 
   // Initializes your app with your bot token and signing secret
   const app = new App({
@@ -11,7 +15,7 @@ export async function createBoltComponent(): Promise<IBaseComponent> {
     appToken: process.env.SLACK_APP_TOKEN
   });
 
-  // Listens to incoming command
+  // Listens to create command
   app.command('/create', async ({ ack, body, client, logger }) => {
     // Acknowledge command request
     await ack();
@@ -44,6 +48,17 @@ export async function createBoltComponent(): Promise<IBaseComponent> {
               accessory: {
                 action_id: "severity",
                 type: "static_select",
+                initial_option: {
+                  text: {
+                    type: "plain_text",
+                    text: "SEV-1"
+                  },
+                  value: "sev-1",
+                  description: {
+                    type: "plain_text",
+                    text: "Critical, impacting 50% of users"
+                  }
+                },
                 options: [
                   {
                     text: {
@@ -97,7 +112,7 @@ export async function createBoltComponent(): Promise<IBaseComponent> {
                     value: "sev-5",
                     description: {
                       type: "plain_text",
-                      text: "Minor issue"
+                      text: "Cosmetics issues or bugs"
                     }
                   }
                 ]
@@ -221,64 +236,74 @@ export async function createBoltComponent(): Promise<IBaseComponent> {
     }
   });
 
-  // Handle a view_submission request
+  // Handle create view_submission request
   app.view('create', async ({ ack, body, view, client, logger }) => {
     // Acknowledge the view_submission request
     await ack();
 
-    // Do whatever you want with the input data - here we're saving it to a DB then sending the user a verifcation of their submission
-    console.log('body')
-    console.log(body)
-    console.log('view')
-    console.log(view)
-    const values = view['state']['values'];
-    const severity = values['severity']
-    const reportDate = values['report_date']
-    const reportTime = values['report_time']
-    const point = values['point']
-    const contact = values['contact']
-    const title = values['title']
-    const description = values['description']
-    console.log('severity')
-    console.log(severity)
-    console.log(severity['selected_option'])
-    console.log('report date')
-    console.log(reportDate)
-    console.log('report time')
-    console.log(reportTime)
-    console.log('contact')
-    console.log(contact)
-    console.log('point')
-    console.log(point)
-    console.log('title')
-    console.log(title)
-    console.log('description')
-    console.log(description)
-
-    // Assume there's an input block with `block_1` as the block_id and `input_a`
-    const user = body['user']['id'];
-
-    // Message to send user
-    let msg = 'Created succesfully with the following data:\n\n';
-    msg += `*severity:* ${severity.severity.selected_option?.text.text}\n`
-    msg += `*report date and time:* ${reportDate.report_date.selected_date}   ${reportTime.report_time.selected_time}hs\n`
-    msg += `*point:* ${point.point.selected_user}\n`
-    msg += `*contact:* ${contact.contact.selected_user}\n`
-    msg += `*title:* ${title.title.value}\n`
-    msg += `*description:* ${description.description.value}\n`
-    
-    // Save to DB
-    // const results = await db.set(user.input, val);
-
-    // if (results) {
-    //   // DB save was successful
-    //   msg = 'Your submission was successful';
-    // } else {
-    //   msg = 'There was an error with your submission';
-    // }
-
-    // Message the user
     try {
+      // Get data from modal
+      const values = view['state']['values'];
+      const severity = values['severity'].severity.selected_option?.value
+      const reportDate = values['report_date'].report_date.selected_date
+      const reportTime = values['report_time'].report_time.selected_time
+      const point = values['point'].point.selected_user
+      const contact = values['contact'].contact.selected_user
+      const title = values['title'].title.value
+      const description = values['description'].description.value
+      
+      // Assume there's an input block with `block_1` as the block_id and `input_a`
+      const user = body['user']['id'];
+
+      // Build reported_at
+      const reportedAt = "'" + reportDate + " " + reportTime + ":00'"
+      // const reportedAt = "'2022-09-26 10:18:00.000'"
+
+      // Save to DB
+      const queryResult = await pg.query(
+        SQL`INSERT INTO incidents(
+          update_number,
+          severity,
+          title,
+          description,
+          status,
+          point,
+          contact,
+          reported_at,
+          closed_at
+        ) VALUES (
+          0,
+          ${severity},
+          ${title},
+          ${description},
+          'open',
+          ${point},
+          ${contact},
+          ${reportedAt},
+          null
+        )`
+      )
+
+      // Message to send user
+      let msg = 'Incident created succesfully with the following data:\n\n';
+      msg += `*severity:* ${severity}\n`
+      msg += `*report date and time:* ${reportDate}   ${reportTime}hs\n`
+      msg += `*point:* ${point}\n`
+      msg += `*contact:* ${contact}\n`
+      msg += `*title:* ${title}\n`
+      msg += `*description:* ${description}\n`
+      
+      console.log('query results')
+      console.log(queryResult)
+      // if (results) {
+      //   // DB save was successful
+      //   msg = 'Your submission was successful';
+      // } else {
+      //   msg = 'There was an error with your submission';
+      // }
+
+      // Message the user
+    
       await client.chat.postMessage({
         channel: user,
         text: msg
@@ -288,6 +313,85 @@ export async function createBoltComponent(): Promise<IBaseComponent> {
       logger.error(error);
     }
 
+  });
+
+  app.command('/update', async ({ ack, body, client, logger }) => {
+    // Acknowledge command request
+    await ack();
+  
+    try {
+      // Get all incidents
+      const queryResult = await pg.query<Incident>(
+        SQL`SELECT 
+              m.id,
+              m.update_number,
+              m.severity,
+              m.title,
+              m.description,
+              m.status,
+              m.point,
+              m.contact,
+              m.reported_at,
+              m.closed_at
+            FROM (
+              SELECT id, MAX(update_number) AS last
+              FROM incidents
+              GROUP BY id
+            ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number;
+        `
+      )
+      console.log(queryResult)
+
+      // Build options for the incidents menu
+      const loadedIncidentsOptions: PlainTextOption[] = []
+      queryResult.rows.forEach( (incident: Incident) => {
+        loadedIncidentsOptions.push({
+          text: {
+            type: 'plain_text',
+            text: (incident.status == 'closed' ? '✅ ' : '❌ ') + incident.title,
+            emoji: true
+          },
+          value: incident.id.toString()
+        })
+      })
+
+      // Call views.open with the built-in client
+      const result = await client.views.open({
+        // Pass a valid trigger_id within 3 seconds of receiving it
+        trigger_id: body.trigger_id,
+        // View payload
+        view: {
+          type: 'modal',
+          // View identifier
+          callback_id: 'update',
+          title: {
+            type: 'plain_text',
+            text: 'Update an incident'
+          },
+          blocks: [
+            {
+              type: "input",
+              element: {
+                type: "static_select",
+                options: await loadedIncidentsOptions
+              },
+              label: {
+                type: "plain_text",
+                text: "Select the incident"
+            },
+            }
+          ],
+          submit: {
+            type: 'plain_text',
+            text: 'Update'
+          }
+        }
+      });
+      logger.info(result);
+    }
+    catch (error) {
+      logger.error(error);
+    }
   });
 
   async function start() {
@@ -303,4 +407,20 @@ export async function createBoltComponent(): Promise<IBaseComponent> {
     start,
     stop
   }
+}
+
+type Severity = 'sev-1' | 'sev-2' | 'sev-3' | 'sev-4' | 'sev-5';
+type Status = 'open' | 'closed';
+
+type Incident = {
+  id: number,
+  update_number: number,
+  severity: Severity,
+  title: string,
+  description: string,
+  status: Status,
+  point: string,
+  contact: string,
+  reported_at: Date,
+  closed_at: Date
 }
