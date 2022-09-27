@@ -6,6 +6,8 @@ import { createMetricsComponent } from "@well-known-components/metrics"
 import { AppComponents, GlobalContext } from "./types"
 import { metricDeclarations } from "./metrics"
 import { createBoltComponent } from "./ports/bolt"
+import { createPgComponent } from '@well-known-components/pg-component'
+import path from 'path'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
@@ -16,7 +18,19 @@ export async function initComponents(): Promise<AppComponents> {
   const statusChecks = await createStatusCheckComponent({ server, config })
   const fetch = await createFetchComponent()
   const metrics = await createMetricsComponent(metricDeclarations, { server, config })
-  const bolt = await createBoltComponent()
+  const pg = await createPgComponent(
+    { logs, config, metrics },
+    {
+      migration: {
+        databaseUrl: await config.requireString('PG_COMPONENT_PSQL_CONNECTION_STRING'),
+        dir: path.resolve(__dirname, 'migrations'),
+        migrationsTable: 'pgmigrations',
+        ignorePattern: '.*\\.map',
+        direction: 'up',
+      },
+    }
+  )
+  const bolt = await createBoltComponent({ pg })
 
   return {
     config,
@@ -25,6 +39,7 @@ export async function initComponents(): Promise<AppComponents> {
     statusChecks,
     fetch,
     metrics,
-    bolt
+    bolt,
+    pg
   }
 }

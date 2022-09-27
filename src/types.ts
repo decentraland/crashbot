@@ -6,6 +6,7 @@ import type {
   IBaseComponent,
   IMetricsComponent,
 } from "@well-known-components/interfaces"
+import { IPgComponent } from "@well-known-components/pg-component"
 import { metricDeclarations } from "./metrics"
 
 export type GlobalContext = {
@@ -20,6 +21,7 @@ export type BaseComponents = {
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
   bolt: IBaseComponent
+  pg: IPgComponent
 }
 
 // components used in runtime
