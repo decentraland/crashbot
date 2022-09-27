@@ -252,7 +252,6 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       const title = values['title'].title.value
       const description = values['description'].description.value
       
-      // Assume there's an input block with `block_1` as the block_id and `input_a`
       const user = body['user']['id'];
 
       // Build reported_at
@@ -262,6 +261,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       // Save to DB
       const queryResult = await pg.query(
         SQL`INSERT INTO incidents(
+          blame,
           update_number,
           severity,
           title,
@@ -272,6 +272,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
           reported_at,
           closed_at
         ) VALUES (
+          ${user},
           0,
           ${severity},
           ${title},
@@ -373,12 +374,13 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
               type: "input",
               element: {
                 type: "static_select",
-                options: await loadedIncidentsOptions
+                options: loadedIncidentsOptions
               },
               label: {
                 type: "plain_text",
                 text: "Select the incident"
-            },
+              },
+              optional: false
             }
           ],
           submit: {

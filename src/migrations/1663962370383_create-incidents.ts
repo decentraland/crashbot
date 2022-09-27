@@ -16,6 +16,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       notNull: true,
       default: pgm.func('NOW()'),
     },
+    blame: { type: 'TEXT', notNull: true },
     reported_at: { type: 'TIMESTAMP' },
     closed_at: { type: 'TIMESTAMP' },
     severity: { type: 'severity', notNull: true},
