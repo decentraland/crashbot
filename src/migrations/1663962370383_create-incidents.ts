@@ -11,20 +11,21 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.createTable(tableName, {
     id: { type: 'SERIAL', notNull: true },
     update_number: { type: 'SMALLINT', notNull: true},
+    blame: { type: 'TEXT', notNull: true },
     created_at: {
       type: 'TIMESTAMP',
       notNull: true,
       default: pgm.func('NOW()'),
     },
-    blame: { type: 'TEXT', notNull: true },
     reported_at: { type: 'TIMESTAMP', notNull: true },
     closed_at: { type: 'TIMESTAMP' },
+    status: { type: 'status', notNull: true },
     severity: { type: 'severity', notNull: true},
-    point: { type: 'TEXT' },
-    contact: { type: 'TEXT' },
     title: { type: 'TEXT', notNull: true },
     description: { type: 'TEXT', notNull: true },
-    status: { type: 'status', notNull: true },
+    point: { type: 'TEXT' },
+    contact: { type: 'TEXT' },
+    rca_link: { type: 'TEXT' }
   })
 }
 
