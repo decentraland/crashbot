@@ -127,7 +127,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
               m.id,
               m.update_number,
               m.reported_at,
-              m.closed_at
+              m.closed_at,
               m.status, 
               m.severity,
               m.title,
