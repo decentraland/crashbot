@@ -126,14 +126,15 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
         SQL`SELECT 
               m.id,
               m.update_number,
+              m.reported_at,
+              m.closed_at
+              m.status, 
               m.severity,
               m.title,
               m.description,
-              m.status,
               m.point,
               m.contact,
-              m.reported_at,
-              m.closed_at
+              m.rca_link
             FROM (
               SELECT id, MAX(update_number) AS last
               FROM incidents
