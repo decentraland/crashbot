@@ -1,5 +1,5 @@
 import { IBaseComponent } from "@well-known-components/interfaces";
-import { App, PlainTextOption, ViewStateValue } from '@slack/bolt';
+import { ActionsBlock, App, BlockAction, PlainTextElement, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelectAction, UsersSelect, View, ViewStateValue } from '@slack/bolt';
 import { AppComponents } from "../types";
 import SQL from "sql-template-strings";
 
@@ -106,17 +106,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       msg += `*title:* ${title}\n`
       msg += `*description:* ${description}\n`
 
-      console.log('query results')
-      console.log(queryResult)
-      // if (results) {
-      //   // DB save was successful
-      //   msg = 'Your submission was successful';
-      // } else {
-      //   msg = 'There was an error with your submission';
-      // }
-
       // Message the user    
-    
       await client.chat.postMessage({
         channel: user,
         text: msg
@@ -194,7 +184,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
           submit: {
             type: 'plain_text',
             text: 'Update'
-          }
+          },
+          private_metadata: JSON.stringify({ incidents: queryResult.rows })
         }
       });
       logger.info(result);
@@ -202,6 +193,148 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
     catch (error) {
       logger.error(error);
     }
+  });
+
+  app.action('loaded_incidents', async ({ ack, body, logger, client }) => {
+    await ack();
+
+    try {
+      logger.info(body);
+      const blockActionBody = body as BlockAction
+      const previousView = blockActionBody.view
+      const action = blockActionBody.actions[0] as StaticSelectAction;
+
+      console.log('selected option:')
+      console.log(action.selected_option)
+
+      const selectIncidentId = action.selected_option.value
+
+      const queryResult = await pg.query<Incident>(
+        SQL`SELECT * FROM incidents WHERE id = ${selectIncidentId} ORDER BY update_number DESC LIMIT 1;`
+      )
+      const incident = queryResult.rows[0]
+      console.log('incident:')
+      console.log(incident)
+
+      // Build the new view
+      const newView = getIncidentView({
+        callbackId: 'update',
+        modalTitle: 'Update an incident',
+        severityInitialOption: severitiesOptions[incident.severity] as PlainTextOption,
+        reportDate: incident.reported_at,
+        initialPoint: incident.point,
+        initialContact: incident.contact,
+        title: incident.title,
+        description: incident.description,
+        submitButtonText: 'Update'
+      });
+      console.log(previousView)
+      console.log('parsing')
+      
+      // Parse metadata
+      const metadata = JSON.parse(previousView?.private_metadata ?? '{}')
+      
+      // Add the selected incdent's id to the metadata
+      metadata.selected_incident_id = selectIncidentId
+      
+      // Pass the data about all the incidents
+      newView.private_metadata = JSON.stringify(metadata)
+      
+      // Call views.update with the built-in client
+      const result = await client.views.update({
+        view_id: previousView?.id,
+        hash: previousView?.hash,
+        view: newView
+      });
+      logger.info(result);
+    }
+    catch (error) {
+      logger.error(error);
+    }
+  });
+
+  // Handle update view_submission request
+  app.view('update', async ({ ack, body, view, client, logger }) => {
+    // Acknowledge the view_submission request
+    await ack();
+
+    try {
+      // Get data from modal
+      const values = view['state']['values'];
+      const severity = values['severity'].severity.selected_option?.value
+      const reportDate = values['report_date'].report_date.selected_date
+      const reportTime = values['report_time'].report_time.selected_time
+      const point = values['point'].point.selected_user
+      const contact = values['contact'].contact.selected_user
+      const title = values['title'].title.value
+      const description = values['description'].description.value
+
+      // Get metadata from modal
+      const metadata = JSON.parse(view.private_metadata)
+      const allIncidents = metadata.incidents as Incident[]
+      const selectedIncident = allIncidents.filter( incident => (incident.id == metadata.selected_incident_id))[0]
+
+      console.log('--------------------------- view ---------------------------')
+      console.log(view)
+      console.log('--------------------------- values ---------------------------')
+      console.log(values)
+
+      const user = body['user']['id'];
+
+      console.log('selected incident:')
+      console.log(selectedIncident)
+
+      // Build reported_at
+      const reportedAt = "'" + reportDate + " " + reportTime + ":00'"
+
+      // Save to DB
+      const queryResult = await pg.query(
+        SQL`INSERT INTO incidents(
+          id,
+          update_number,
+          blame,
+          severity,
+          title,
+          description,
+          status,
+          point,
+          contact,
+          reported_at,
+          closed_at
+        ) VALUES (
+          ${selectedIncident.id},
+          ${selectedIncident.update_number + 1},
+          ${user},
+          ${severity},
+          ${title},
+          ${description},
+          'open',
+          ${point},
+          ${contact},
+          ${reportedAt},
+          null
+        )`
+      )
+
+      // Message to send user
+      let msg = 'Incident updated succesfully with the following data:\n\n';
+      msg += `*severity:* ${severity}\n`
+      msg += `*report date and time:* ${reportDate}   ${reportTime}hs\n`
+      msg += `*point:* ${point}\n`
+      msg += `*contact:* ${contact}\n`
+      msg += `*title:* ${title}\n`
+      msg += `*description:* ${description}\n`
+
+      // Message the user    
+      await client.chat.postMessage({
+        channel: user,
+        text: msg
+      });
+    }
+    catch (error) {
+      logger.error(error);
+    }
+
   });
 
   async function start() {
