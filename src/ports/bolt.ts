@@ -81,8 +81,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
           status,
           point,
           contact,
-          reported_at,
-          closed_at
+          reported_at
         ) VALUES (
           ${user},
           0,
@@ -92,8 +91,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
           'open',
           ${point},
           ${contact},
-          ${reportedAt},
-          null
+          ${reportedAt}
         )`
       )
 
