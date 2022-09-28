@@ -105,7 +105,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       msg += `*contact:* ${contact}\n`
       msg += `*title:* ${title}\n`
       msg += `*description:* ${description}\n`
-      
+
       console.log('query results')
       console.log(queryResult)
       // if (results) {
@@ -115,7 +115,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       //   msg = 'There was an error with your submission';
       // }
 
-      // Message the user
+      // Message the user    
     
       await client.chat.postMessage({
         channel: user,
@@ -153,7 +153,6 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
             ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number;
         `
       )
-      console.log(queryResult)
 
       // Build options for the incidents menu
       const loadedIncidentsOptions: PlainTextOption[] = []
@@ -170,9 +169,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
 
       // Call views.open with the built-in client
       const result = await client.views.open({
-        // Pass a valid trigger_id within 3 seconds of receiving it
         trigger_id: body.trigger_id,
-        // View payload
         view: {
           type: 'modal',
           // View identifier
@@ -213,9 +210,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
     console.log('⚡️ Bolt app is running!');
   }
 
-  async function stop() {
-
-  }
+  async function stop() {}
 
   return {
     start,
