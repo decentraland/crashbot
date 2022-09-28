@@ -122,7 +122,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
   
     try {
       // Get all incidents
-      const queryResult = await pg.query<Incident>(
+      const queryResult = await pg.query<IncidentRow>(
         SQL`SELECT 
               m.id,
               m.update_number,
@@ -145,7 +145,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
 
       // Build options for the incidents menu
       const loadedIncidentsOptions: PlainTextOption[] = []
-      queryResult.rows.forEach( (incident: Incident) => {
+      queryResult.rows.forEach( (incident: IncidentRow) => {
         loadedIncidentsOptions.push({
           text: {
             type: 'plain_text',
@@ -161,7 +161,6 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
         trigger_id: body.trigger_id,
         view: {
           type: 'modal',
-          // View identifier
           callback_id: 'update',
           title: {
             type: 'plain_text',
@@ -198,24 +197,18 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
     await ack();
 
     try {
-      logger.info(body);
+      // Get data from body
       const blockActionBody = body as BlockAction
       const previousView = blockActionBody.view
       const action = blockActionBody.actions[0] as StaticSelectAction;
-
-      console.log('selected option:')
-      console.log(action.selected_option)
-
       const selectIncidentId = action.selected_option.value
 
-      const queryResult = await pg.query<Incident>(
+      const queryResult = await pg.query<IncidentRow>(
         SQL`SELECT * FROM incidents WHERE id = ${selectIncidentId} ORDER BY update_number DESC LIMIT 1;`
       )
-      const incident = queryResult.rows[0]
-      console.log('incident:')
-      console.log(incident)
-
+  
       // Build the new view
+      const incident = queryResult.rows[0]
       const newView = getIncidentView({
         callbackId: 'update',
         modalTitle: 'Update an incident',
@@ -227,9 +220,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
         description: incident.description,
         submitButtonText: 'Update'
       });
-      console.log(previousView)
-      console.log('parsing')
-      
+
       // Parse metadata
       const metadata = JSON.parse(previousView?.private_metadata ?? '{}')
       
@@ -270,7 +261,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
 
       // Get metadata from modal
       const metadata = JSON.parse(view.private_metadata)
-      const allIncidents = metadata.incidents as Incident[]
+      const allIncidents = metadata.incidents as IncidentRow[]
       const selectedIncident = allIncidents.filter( incident => (incident.id == metadata.selected_incident_id))[0]
 
       console.log('--------------------------- view ---------------------------')
@@ -352,17 +343,20 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
 type Severity = 'sev-1' | 'sev-2' | 'sev-3' | 'sev-4' | 'sev-5';
 type Status = 'open' | 'closed';
 
-type Incident = {
+type IncidentRow = {
   id: number,
   update_number: number,
+  blame: string,
+  created_at: Date,
+  reported_at: Date,
+  closed_at: Date,
+  status: Status,
   severity: Severity,
   title: string,
   description: string,
-  status: Status,
   point: string,
   contact: string,
-  reported_at: Date,
-  closed_at: Date
+  rca_link: string
 }
 
 type IncidentViewOptions = {
