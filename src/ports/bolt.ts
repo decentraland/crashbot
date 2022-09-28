@@ -180,16 +180,15 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
           },
           blocks: [
             {
-              type: "input",
-              element: {
-                type: "static_select",
-                options: loadedIncidentsOptions
-              },
-              label: {
-                type: "plain_text",
-                text: "Select the incident"
-              },
-              optional: false
+              type: "actions",
+              block_id: 'loaded_incidents',
+              elements: [
+                {
+                  action_id: 'loaded_incidents',
+                  type: "static_select",
+                  options: loadedIncidentsOptions
+                }
+              ]
             }
           ],
           submit: {
