@@ -29,205 +29,17 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
         // Pass a valid trigger_id within 3 seconds of receiving it
         trigger_id: body.trigger_id,
         // View payload
-        view: {
-          type: 'modal',
-          // View identifier
-          callback_id: 'create',
-          title: {
-            type: 'plain_text',
-            text: 'Create an incident'
-          },
-          blocks: [
-            {
-              type: "section",
-              block_id: "severity",
-              text: {
-                type: "mrkdwn",
-                text: "Severity"
-              },
-              accessory: {
-                action_id: "severity",
-                type: "static_select",
-                initial_option: {
-                  text: {
-                    type: "plain_text",
-                    text: "SEV-1"
-                  },
-                  value: "sev-1",
-                  description: {
-                    type: "plain_text",
-                    text: "Critical, impacting 50% of users"
-                  }
-                },
-                options: [
-                  {
-                    text: {
-                      type: "plain_text",
-                      text: "SEV-1"
-                    },
-                    value: "sev-1",
-                    description: {
-                      type: "plain_text",
-                      text: "Critical, impacting 50% of users"
-                    }
-                  },
-                  {
-                    text: {
-                      type: "plain_text",
-                      text: "SEV-2"
-                    },
-                    value: "sev-2",
-                    description: {
-                      type: "plain_text",
-                      text: "Critical, impacting some users"
-                    }
-                  },
-                  {
-                    text: {
-                      type: "plain_text",
-                      text: "SEV-3"
-                    },
-                    value: "sev-3",
-                    description: {
-                      type: "plain_text",
-                      text: "Stability or minor user impact"
-                    }
-                  },
-                  {
-                    text: {
-                      type: "plain_text",
-                      text: "SEV-4"
-                    },
-                    value: "sev-4",
-                    description: {
-                      type: "plain_text",
-                      text: "Minor issue"
-                    }
-                  },
-                  {
-                    text: {
-                      type: "plain_text",
-                      text: "SEV-5"
-                    },
-                    value: "sev-5",
-                    description: {
-                      type: "plain_text",
-                      text: "Cosmetics issues or bugs"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              type: "section",
-              block_id: "report_date",
-              text: {
-                type: "mrkdwn",
-                text: "Report date"
-              },
-              accessory: {
-                type: "datepicker",
-                action_id: "report_date",
-                initial_date: now.toISOString().split('T')[0],
-                placeholder: {
-                  type: "plain_text",
-                  text: "Select a date"
-                }
-              }
-            },
-            {
-              "type": "section",
-              "block_id": "report_time",
-              "text": {
-                "type": "mrkdwn",
-                "text": "Report time"
-              },
-              "accessory": {
-                "type": "timepicker",
-                "action_id": "report_time",
-                "initial_time": now.toLocaleTimeString([], {
-                    hourCycle: 'h23',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }),
-                "placeholder": {
-                  "type": "plain_text",
-                  "text": "Select a time"
-                }
-              }
-            },
-            {
-              type: "section",
-              block_id: "point",
-              text: {
-                type: "mrkdwn",
-                text: "Point"
-              },
-              accessory: {
-                action_id: "point",
-                type: "users_select",
-                placeholder: {
-                  type: "plain_text",
-                  text: "Select user as point"
-                }
-              }
-            },
-            {
-              type: "section",
-              block_id: "contact",
-              text: {
-                type: "mrkdwn",
-                text: "Contact"
-              },
-              accessory: {
-                action_id: "contact",
-                type: "users_select",
-                placeholder: {
-                  type: "plain_text",
-                  text: "Select user as contact"
-                }
-              }
-            
-            },
-            {
-              type: "input",
-              block_id: "title",
-              label: {
-                type: "plain_text",
-                text: "Title"
-              },
-              element: {
-                type: "plain_text_input",
-                action_id: "title",
-                placeholder: {
-                  type: "plain_text",
-                  text: "Summary of the incident"
-                }
-              }
-            },
-            {
-              type: "input",
-              block_id: "description",
-              label: {
-                type: "plain_text",
-                text: "Description"
-              },
-              element: {
-                type: "plain_text_input",
-                action_id: "description",
-                placeholder: {
-                  type: "plain_text",
-                  text: "Describe the incident and steps to reproduce"
-                },
-                multiline: true
-              }
-            }
-          ],
-          submit: {
-            type: 'plain_text',
-            text: 'Create'
-          }
-        }
+        view: getIncidentView({
+          callbackId: 'create',
+          modalTitle: 'Create an incident',
+          severityInitialOption: severitiesOptions['sev-1'] as PlainTextOption,
+          initialPoint: '',
+          initialContact: '',
+          reportDate: now,
+          title: '',
+          description: '',
+          submitButtonText: 'Create'
+        })
       });
       logger.info(result);
     }
@@ -426,3 +238,232 @@ type Incident = {
   reported_at: Date,
   closed_at: Date
 }
+
+type IncidentViewOptions = {
+  callbackId: string,
+  modalTitle: string,
+  severityInitialOption: PlainTextOption,
+  initialPoint: string,
+  initialContact: string,
+  reportDate: Date
+  title: string,
+  description: string,
+  submitButtonText: string
+}
+
+const severitiesOptions = {
+  'sev-1': {
+    text: {
+      type: "plain_text",
+      text: "SEV-1"
+    },
+    value: "sev-1",
+    description: {
+      type: "plain_text",
+      text: "Critical, impacting 50% of users"
+    }
+  },
+  'sev-2': {
+    text: {
+      type: "plain_text",
+      text: "SEV-2"
+    },
+    value: "sev-2",
+    description: {
+      type: "plain_text",
+      text: "Critical, impacting some users"
+    }
+  },
+  'sev-3': {
+    text: {
+      type: "plain_text",
+      text: "SEV-3"
+    },
+    value: "sev-3",
+    description: {
+      type: "plain_text",
+      text: "Stability or minor user impact"
+    }
+  },
+  'sev-4': {
+    text: {
+      type: "plain_text",
+      text: "SEV-4"
+    },
+    value: "sev-4",
+    description: {
+      type: "plain_text",
+      text: "Minor issue"
+    }
+  },
+  'sev-5': {
+    text: {
+      type: "plain_text",
+      text: "SEV-5"
+    },
+    value: "sev-5",
+    description: {
+      type: "plain_text",
+      text: "Cosmetics issues or bugs"
+    }
+  }
+}
+
+function getIncidentView(options: IncidentViewOptions): View {
+  let view = {
+    type: 'modal',
+    // View identifier
+    callback_id: options.callbackId,
+    title: {
+      type: 'plain_text',
+      text: options.modalTitle
+    },
+    blocks: [
+      // Severity
+      {
+        type: "section",
+        block_id: "severity",
+        text: {
+          type: "mrkdwn",
+          text: "Severity"
+        },
+        accessory: {
+          action_id: "severity",
+          type: "static_select",
+          initial_option: options.severityInitialOption,
+          options: Object.values(severitiesOptions) as PlainTextOption[]
+        }
+      },
+      // Report date
+      {
+        type: "section",
+        block_id: "report_date",
+        text: {
+          type: "mrkdwn",
+          text: "Report date"
+        },
+        accessory: {
+          type: "datepicker",
+          action_id: "report_date",
+          initial_date: options.reportDate.toISOString().split('T')[0],
+          placeholder: {
+            type: "plain_text",
+            text: "Select a date"
+          }
+        }
+      },
+      // Report time
+      {
+        type: "section",
+        block_id: "report_time",
+        text: {
+          type: "mrkdwn",
+          text: "Report time"
+        },
+        accessory: {
+          type: "timepicker",
+          action_id: "report_time",
+          initial_time: options.reportDate.toLocaleTimeString([], {
+           hourCycle: 'h23',
+           hour: '2-digit',
+           minute: '2-digit'
+          }),
+          placeholder: {
+            type: "plain_text",
+            text: "Select a time"
+          }
+        }
+      },
+      // Point
+      {
+        type: "section",
+        block_id: "point",
+        text: {
+          type: "mrkdwn",
+          text: "Point"
+        },
+        accessory: {
+          action_id: "point",
+          type: "users_select",
+          placeholder: {
+            type: "plain_text",
+            text: "Select user as point"
+          }
+        }
+      },
+      // Contact
+      {
+        type: "section",
+        block_id: "contact",
+        text: {
+          type: "mrkdwn",
+          text: "Contact"
+        },
+        accessory: {
+          action_id: "contact",
+          type: "users_select",
+          placeholder: {
+            type: "plain_text",
+            text: "Select user as contact"
+          }
+        }
+      },
+      // Title
+      {
+        type: "input",
+        block_id: "title",
+        label: {
+          type: "plain_text",
+          text: "Title"
+        },
+        element: {
+          type: "plain_text_input",
+          action_id: "title",
+          placeholder: {
+            type: "plain_text",
+            text: "Summary of the incident"
+          },
+          initial_value: options.title
+        }
+      },
+      // Description
+      {
+        type: "input",
+        block_id: "description",
+        label: {
+          type: "plain_text",
+          text: "Description"
+        },
+        element: {
+          type: "plain_text_input",
+          action_id: "description",
+          placeholder: {
+            type: "plain_text",
+            text: "Describe the incident and steps to reproduce"
+          },
+          multiline: true,
+          initial_value: options.description
+        }
+      }
+    ],
+    submit: {
+      type: 'plain_text',
+      text: options.submitButtonText
+    }
+  } as View
+
+  // Add point if not null
+  if (options.initialPoint) {
+    ((view.blocks[3] as SectionBlock).accessory as UsersSelect).initial_user = options.initialPoint
+  }
+
+  // Add contact if not null
+  if (options.initialContact) {
+    ((view.blocks[4] as SectionBlock).accessory as UsersSelect).initial_user = options.initialContact
+  }
+
+  view.private_metadata
+
+  return view
+}
+
