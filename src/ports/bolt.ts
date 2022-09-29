@@ -715,7 +715,8 @@ function getIncidentView(options: IncidentViewOptions): View {
           type: "plain_text",
           text: "Paste a link to the RCA"
         }
-      } as PlainTextInput
+      } as PlainTextInput,
+      optional: true
     }
 
     // Initialize RCA Link input with previous data
