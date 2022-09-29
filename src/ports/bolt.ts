@@ -1,5 +1,5 @@
 import { IBaseComponent } from "@well-known-components/interfaces";
-import { ActionsBlock, App, BlockAction, PlainTextElement, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelectAction, UsersSelect, View, ViewStateValue } from '@slack/bolt';
+import { ActionsBlock, App, BlockAction, PlainTextElement, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelect, StaticSelectAction, UsersSelect, View, ViewStateValue } from '@slack/bolt';
 import { AppComponents } from "../types";
 import SQL from "sql-template-strings";
 
@@ -32,9 +32,9 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
         view: getIncidentView({
           callbackId: 'create',
           modalTitle: 'Create an incident',
-          severityInitialOption: severitiesOptions['sev-1'] as PlainTextOption,
-          initialPoint: '',
-          initialContact: '',
+          severityOption: severitiesOptions['sev-1'] as PlainTextOption,
+          point: '',
+          contact: '',
           reportDate: now,
           title: '',
           description: '',
@@ -143,6 +143,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
         `
       )
 
+      console.log(queryResult)
+
       // Build options for the incidents menu
       const loadedIncidentsOptions: PlainTextOption[] = []
       queryResult.rows.forEach( (incident: IncidentRow) => {
@@ -212,13 +214,14 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       const newView = getIncidentView({
         callbackId: 'update',
         modalTitle: 'Update an incident',
-        severityInitialOption: severitiesOptions[incident.severity] as PlainTextOption,
+        severityOption: severitiesOptions[incident.severity] as PlainTextOption,
         reportDate: incident.reported_at,
-        initialPoint: incident.point,
-        initialContact: incident.contact,
+        point: incident.point,
+        contact: incident.contact,
         title: incident.title,
         description: incident.description,
-        submitButtonText: 'Update'
+        submitButtonText: 'Update',
+        status: incident.status
       });
 
       // Parse metadata
@@ -251,13 +254,14 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
     try {
       // Get data from modal
       const values = view['state']['values'];
-      const severity = values['severity'].severity.selected_option?.value
+      const severity = values['severity'].severity.selected_option
       const reportDate = values['report_date'].report_date.selected_date
       const reportTime = values['report_time'].report_time.selected_time
       const point = values['point'].point.selected_user
       const contact = values['contact'].contact.selected_user
       const title = values['title'].title.value
       const description = values['description'].description.value
+      const status = values['status'].status.selected_option
 
       // Get metadata from modal
       const metadata = JSON.parse(view.private_metadata)
@@ -268,6 +272,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       console.log(view)
       console.log('--------------------------- values ---------------------------')
       console.log(values)
+      console.log(status)
 
       const user = body['user']['id'];
 
@@ -295,10 +300,10 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
           ${selectedIncident.id},
           ${selectedIncident.update_number + 1},
           ${user},
-          ${severity},
+          ${severity?.value},
           ${title},
           ${description},
-          'open',
+          ${status?.value},
           ${point},
           ${contact},
           ${reportedAt},
@@ -308,12 +313,14 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
 
       // Message to send user
       let msg = 'Incident updated succesfully with the following data:\n\n';
-      msg += `*severity:* ${severity}\n`
+      msg += `*severity:* ${severity?.text.text}\n`
       msg += `*report date and time:* ${reportDate}   ${reportTime}hs\n`
       msg += `*point:* ${point}\n`
       msg += `*contact:* ${contact}\n`
       msg += `*title:* ${title}\n`
       msg += `*description:* ${description}\n`
+      msg += `*status:* ${status?.text.text}`
+
 
       // Message the user    
       await client.chat.postMessage({
@@ -362,12 +369,13 @@ type IncidentRow = {
 type IncidentViewOptions = {
   callbackId: string,
   modalTitle: string,
-  severityInitialOption: PlainTextOption,
-  initialPoint: string,
-  initialContact: string,
-  reportDate: Date
+  reportDate: Date,
+  status?: Status
+  severityOption: PlainTextOption,
   title: string,
   description: string,
+  point: string,
+  contact: string,
   submitButtonText: string
 }
 
@@ -429,8 +437,27 @@ const severitiesOptions = {
   }
 }
 
+const statusOptions = {
+  'open': {
+    text: {
+      type: "plain_text",
+      text: "Open ❌",
+      emoji: true
+    },
+    value: "open"
+  },
+  'closed': {
+    text: {
+      type: "plain_text",
+      text: "Closed ✅",
+      emoji: true
+    },
+    value: "closed"
+  },
+}
+
 function getIncidentView(options: IncidentViewOptions): View {
-  let view = {
+  const view = {
     type: 'modal',
     // View identifier
     callback_id: options.callbackId,
@@ -450,7 +477,7 @@ function getIncidentView(options: IncidentViewOptions): View {
         accessory: {
           action_id: "severity",
           type: "static_select",
-          initial_option: options.severityInitialOption,
+          initial_option: options.severityOption,
           options: Object.values(severitiesOptions) as PlainTextOption[]
         }
       },
@@ -573,15 +600,38 @@ function getIncidentView(options: IncidentViewOptions): View {
   } as View
 
   // Add point if not null
-  if (options.initialPoint) {
-    ((view.blocks[3] as SectionBlock).accessory as UsersSelect).initial_user = options.initialPoint
+  if (options.point) {
+    ((view.blocks[3] as SectionBlock).accessory as UsersSelect).initial_user = options.point
   }
 
   // Add contact if not null
-  if (options.initialContact) {
-    ((view.blocks[4] as SectionBlock).accessory as UsersSelect).initial_user = options.initialContact
+  if (options.contact) {
+    ((view.blocks[4] as SectionBlock).accessory as UsersSelect).initial_user = options.contact
   }
 
+  // Add status menu if updating
+  if (options.callbackId == 'update') {
+    const statusBlock = {
+      type: "section",
+      block_id: "status",
+      text: {
+        type: "mrkdwn",
+        text: "Status"
+      },
+      accessory: {
+        action_id: "status",
+        type: "static_select",
+        options: Object.values(statusOptions) as PlainTextOption[]
+      }
+    }
+
+    // Initialize select menu with status data
+    if (options.status)
+      (statusBlock.accessory as StaticSelect).initial_option = statusOptions[options.status] as PlainTextOption
+
+    // Add block to view
+    view.blocks.push(statusBlock)
+  }
   view.private_metadata
 
   return view
