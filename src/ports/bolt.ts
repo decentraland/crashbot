@@ -1,5 +1,5 @@
 import { IBaseComponent } from "@well-known-components/interfaces";
-import { ActionsBlock, App, BlockAction, PlainTextElement, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelect, StaticSelectAction, UsersSelect, View, ViewStateValue } from '@slack/bolt';
+import { ActionsBlock, App, BlockAction, Datepicker, PlainTextElement, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View, ViewStateValue } from '@slack/bolt';
 import { AppComponents } from "../types";
 import SQL from "sql-template-strings";
 
@@ -216,6 +216,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
         modalTitle: 'Update an incident',
         severityOption: severitiesOptions[incident.severity] as PlainTextOption,
         reportDate: incident.reported_at,
+        resolutionDate: incident.closed_at,
         point: incident.point,
         contact: incident.contact,
         title: incident.title,
@@ -257,6 +258,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       const severity = values['severity'].severity.selected_option
       const reportDate = values['report_date'].report_date.selected_date
       const reportTime = values['report_time'].report_time.selected_time
+      const resolutionDate = values['resolution_date'].resolution_date.selected_date
+      const resolutionTime = values['resolution_time'].resolution_time.selected_time
       const point = values['point'].point.selected_user
       const contact = values['contact'].contact.selected_user
       const title = values['title'].title.value
@@ -279,8 +282,9 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       console.log('selected incident:')
       console.log(selectedIncident)
 
-      // Build reported_at
+      // Build dates
       const reportedAt = "'" + reportDate + " " + reportTime + ":00'"
+      const closedAt = (resolutionDate && resolutionTime) ? "'" + resolutionDate + " " + resolutionTime + ":00'" : null
 
       // Save to DB
       const queryResult = await pg.query(
@@ -307,20 +311,23 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
           ${point},
           ${contact},
           ${reportedAt},
-          null
+          ${closedAt}
         )`
       )
 
-      // Message to send user
+      // Build message to send to user
       let msg = 'Incident updated succesfully with the following data:\n\n';
       msg += `*severity:* ${severity?.text.text}\n`
-      msg += `*report date and time:* ${reportDate}   ${reportTime}hs\n`
+      msg += `*report date and time:* ${reportDate}  ${reportTime}hs\n`
+
+      if(closedAt)
+        msg += `*resolution date and time:* ${resolutionDate}  ${resolutionTime}hs\n`
+      
       msg += `*point:* ${point}\n`
       msg += `*contact:* ${contact}\n`
       msg += `*title:* ${title}\n`
       msg += `*description:* ${description}\n`
-      msg += `*status:* ${status?.text.text}`
-
+      msg += `*status:* ${status?.text.text}\n`
 
       // Message the user    
       await client.chat.postMessage({
@@ -370,6 +377,7 @@ type IncidentViewOptions = {
   callbackId: string,
   modalTitle: string,
   reportDate: Date,
+  resolutionDate?: Date,
   status?: Status
   severityOption: PlainTextOption,
   title: string,
@@ -609,8 +617,60 @@ function getIncidentView(options: IncidentViewOptions): View {
     ((view.blocks[4] as SectionBlock).accessory as UsersSelect).initial_user = options.contact
   }
 
-  // Add status menu if updating
+  // Add fields when updating
   if (options.callbackId == 'update') {
+    // Closed date
+    const resolutionDateBlock = {
+      type: "section",
+      block_id: "resolution_date",
+      text: {
+        type: "mrkdwn",
+        text: "Resolution date"
+      },
+      accessory: {
+        type: "datepicker",
+        action_id: "resolution_date",
+        placeholder: {
+          type: "plain_text",
+          text: "Select a date"
+        }
+      } as Datepicker
+    }
+
+    // Closed time
+    const resolutionTimeBlock = {
+      type: "section",
+      block_id: "resolution_time",
+      text: {
+        type: "mrkdwn",
+        text: "Resolution time"
+      },
+      accessory: {
+        type: "timepicker",
+        action_id: "resolution_time",
+        placeholder: {
+          type: "plain_text",
+          text: "Select a time"
+        }
+      } as Timepicker
+    }
+
+    if (options.resolutionDate) {
+      // Initialize select menu with resolution date data
+      resolutionDateBlock.accessory.initial_date = options.resolutionDate.toISOString().split('T')[0]
+
+      // Initialize select menu with resolution time data
+      resolutionTimeBlock.accessory.initial_time = options.resolutionDate.toLocaleTimeString([], {
+        hourCycle: 'h23',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+
+    // Add resolution date and time blocks to view (after report date and time)
+    view.blocks.splice(3, 0, resolutionDateBlock, resolutionTimeBlock)
+  
+    // Status
     const statusBlock = {
       type: "section",
       block_id: "status",
@@ -622,14 +682,14 @@ function getIncidentView(options: IncidentViewOptions): View {
         action_id: "status",
         type: "static_select",
         options: Object.values(statusOptions) as PlainTextOption[]
-      }
+      } as StaticSelect
     }
 
     // Initialize select menu with status data
     if (options.status)
-      (statusBlock.accessory as StaticSelect).initial_option = statusOptions[options.status] as PlainTextOption
+      statusBlock.accessory.initial_option = statusOptions[options.status] as PlainTextOption
 
-    // Add block to view
+    // Add status block to view
     view.blocks.push(statusBlock)
   }
   view.private_metadata
