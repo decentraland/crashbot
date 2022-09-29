@@ -35,7 +35,7 @@ export async function initComponents(): Promise<AppComponents> {
   return {
     config,
     logs,
-    // server,
+    server,
     statusChecks,
     fetch,
     metrics,

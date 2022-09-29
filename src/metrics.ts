@@ -5,7 +5,12 @@ export const metricDeclarations = {
   test_ping_counter: {
     help: "Count calls to ping",
     type: IMetricsComponent.CounterType,
-    labelNames: ["pathname"],
+    labelNames: ["pathname"]
+  },
+  list_counter: {
+    help: "Count calls to list",
+    type: IMetricsComponent.CounterType,
+    labelNames: ["pathname"]
   },
 }
 
