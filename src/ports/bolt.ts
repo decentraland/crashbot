@@ -1,5 +1,5 @@
 import { IBaseComponent } from "@well-known-components/interfaces";
-import { ActionsBlock, App, BlockAction, Datepicker, PlainTextElement, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View, ViewStateValue } from '@slack/bolt';
+import { ActionsBlock, App, BlockAction, Datepicker, PlainTextElement, PlainTextInput, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View, ViewStateValue } from '@slack/bolt';
 import { AppComponents } from "../types";
 import SQL from "sql-template-strings";
 
@@ -222,7 +222,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
         title: incident.title,
         description: incident.description,
         submitButtonText: 'Update',
-        status: incident.status
+        status: incident.status,
+        rcaLink: incident.rca_link
       });
 
       // Parse metadata
@@ -265,6 +266,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       const title = values['title'].title.value
       const description = values['description'].description.value
       const status = values['status'].status.selected_option
+      const rcaLink = values['rca_link'].rca_link.value
 
       // Get metadata from modal
       const metadata = JSON.parse(view.private_metadata)
@@ -299,7 +301,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
           point,
           contact,
           reported_at,
-          closed_at
+          closed_at,
+          rca_link
         ) VALUES (
           ${selectedIncident.id},
           ${selectedIncident.update_number + 1},
@@ -311,7 +314,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
           ${point},
           ${contact},
           ${reportedAt},
-          ${closedAt}
+          ${closedAt},
+          ${rcaLink}
         )`
       )
 
@@ -320,7 +324,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       msg += `*severity:* ${severity?.text.text}\n`
       msg += `*report date and time:* ${reportDate}  ${reportTime}hs\n`
 
-      if(closedAt)
+      if (closedAt)
         msg += `*resolution date and time:* ${resolutionDate}  ${resolutionTime}hs\n`
       
       msg += `*point:* ${point}\n`
@@ -328,6 +332,9 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
       msg += `*title:* ${title}\n`
       msg += `*description:* ${description}\n`
       msg += `*status:* ${status?.text.text}\n`
+
+      if (rcaLink)
+        msg += `*RCA link:* ${rcaLink}`
 
       // Message the user    
       await client.chat.postMessage({
@@ -384,6 +391,7 @@ type IncidentViewOptions = {
   description: string,
   point: string,
   contact: string,
+  rcaLink?: string,
   submitButtonText: string
 }
 
@@ -691,6 +699,31 @@ function getIncidentView(options: IncidentViewOptions): View {
 
     // Add status block to view
     view.blocks.push(statusBlock)
+
+    // RCA Link
+    const rcaLinkBlock = {
+      type: "input",
+      block_id: "rca_link",
+      label: {
+        type: "plain_text",
+        text: "RCA Link"
+      },
+      element: {
+        type: "plain_text_input",
+        action_id: "rca_link",
+        placeholder: {
+          type: "plain_text",
+          text: "Paste a link to the RCA"
+        }
+      } as PlainTextInput
+    }
+
+    // Initialize RCA Link input with previous data
+    if(options.rcaLink)
+      rcaLinkBlock.element.initial_value = options.rcaLink
+
+    // Add RCA Link block to view
+    view.blocks.push(rcaLinkBlock)
   }
   view.private_metadata
 
