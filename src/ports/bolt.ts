@@ -1,6 +1,6 @@
 import { IBaseComponent } from "@well-known-components/interfaces";
 import { ActionsBlock, App, BlockAction, Datepicker, InputBlock, PlainTextElement, PlainTextInput, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View, ViewStateValue } from '@slack/bolt';
-import { AppComponents } from "../types";
+import { AppComponents, IncidentRow, IncidentViewOptions } from "../types";
 import SQL from "sql-template-strings";
 
 export async function createBoltComponent(components: Pick<AppComponents, 'pg'>): Promise<IBaseComponent> {
@@ -361,39 +361,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
   }
 }
 
-type Severity = 'sev-1' | 'sev-2' | 'sev-3' | 'sev-4' | 'sev-5';
-type Status = 'open' | 'closed';
 
-type IncidentRow = {
-  id: number,
-  update_number: number,
-  blame: string,
-  created_at: Date,
-  reported_at: Date,
-  closed_at: Date,
-  status: Status,
-  severity: Severity,
-  title: string,
-  description: string,
-  point: string,
-  contact: string,
-  rca_link: string
-}
-
-type IncidentViewOptions = {
-  callbackId: string,
-  modalTitle: string,
-  reportDate: Date,
-  resolutionDate?: Date,
-  status?: Status
-  severityOption: PlainTextOption,
-  title: string,
-  description: string,
-  point: string,
-  contact: string,
-  rcaLink?: string,
-  submitButtonText: string
-}
 
 const severitiesOptions = {
   'sev-1': {

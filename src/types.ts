@@ -1,3 +1,4 @@
+import { PlainTextOption } from "@slack/bolt"
 import type { IFetchComponent } from "@well-known-components/http-server"
 import type {
   IConfigComponent,
@@ -17,7 +18,7 @@ export type GlobalContext = {
 export type BaseComponents = {
   config: IConfigComponent
   logs: ILoggerComponent
-  // server: IHttpServerComponent<GlobalContext>
+  server: IHttpServerComponent<GlobalContext>
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
   bolt: IBaseComponent
@@ -47,3 +48,37 @@ export type HandlerContextWithPath<
 >
 
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
+
+export type Severity = 'sev-1' | 'sev-2' | 'sev-3' | 'sev-4' | 'sev-5';
+export type Status = 'open' | 'closed';
+
+export type IncidentRow = {
+  id: number,
+  update_number: number,
+  blame: string,
+  created_at: Date,
+  reported_at: Date,
+  closed_at: Date,
+  status: Status,
+  severity: Severity,
+  title: string,
+  description: string,
+  point: string,
+  contact: string,
+  rca_link: string
+}
+
+export type IncidentViewOptions = {
+  callbackId: string,
+  modalTitle: string,
+  reportDate: Date,
+  resolutionDate?: Date,
+  status?: Status
+  severityOption: PlainTextOption,
+  title: string,
+  description: string,
+  point: string,
+  contact: string,
+  rcaLink?: string,
+  submitButtonText: string
+}
