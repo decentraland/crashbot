@@ -1,5 +1,5 @@
 import { IBaseComponent } from "@well-known-components/interfaces";
-import { ActionsBlock, App, BlockAction, Datepicker, PlainTextElement, PlainTextInput, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View, ViewStateValue } from '@slack/bolt';
+import { ActionsBlock, App, BlockAction, Datepicker, InputBlock, PlainTextElement, PlainTextInput, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View, ViewStateValue } from '@slack/bolt';
 import { AppComponents } from "../types";
 import SQL from "sql-template-strings";
 
@@ -151,7 +151,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg'>)
         loadedIncidentsOptions.push({
           text: {
             type: 'plain_text',
-            text: (incident.status == 'closed' ? '✅ ' : '❌ ') + incident.title,
+            text: `${incident.status == 'closed' ? '✅ ' : '❌ '} DCL-${incident.id} ${incident.title}`,
             emoji: true
           },
           value: incident.id.toString()
