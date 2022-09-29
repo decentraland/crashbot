@@ -30,7 +30,7 @@ export async function initComponents(): Promise<AppComponents> {
       },
     }
   )
-  const bolt = await createBoltComponent({ pg })
+  const bolt = await createBoltComponent({ pg, config })
 
   return {
     config,

@@ -3,16 +3,16 @@ import { ActionsBlock, App, BlockAction, Datepicker, InputBlock, PlainTextElemen
 import { AppComponents, IncidentRow, IncidentViewOptions } from "../types";
 import SQL from "sql-template-strings";
 
-export async function createBoltComponent(components: Pick<AppComponents, 'pg'>): Promise<IBaseComponent> {
+export async function createBoltComponent(components: Pick<AppComponents, 'pg' | 'config'>): Promise<IBaseComponent> {
 
-  const { pg } = components
+  const { pg, config } = components
 
   // Initializes your app with your bot token and signing secret
   const app = new App({
-    token: process.env.SLACK_BOT_TOKEN,
-    signingSecret: process.env.SLACK_SIGNING_SECRET,
+    token: await config.getString('SLACK_BOT_TOKEN') ?? '',
+    signingSecret: await config.getString('SLACK_SIGNING_SECRET') ?? '',
     socketMode: true,
-    appToken: process.env.SLACK_APP_TOKEN
+    appToken: await config.getString('SLACK_APP_TOKEN') ?? ''
   });
 
   // Listens to create command
