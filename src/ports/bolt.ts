@@ -159,37 +159,43 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
         })
       })
 
-      // Call views.open with the built-in client
-      const result = await client.views.open({
-        trigger_id: body.trigger_id,
-        view: {
-          type: 'modal',
-          callback_id: 'update',
-          title: {
-            type: 'plain_text',
-            text: 'Update an incident'
-          },
-          blocks: [
-            {
-              type: "actions",
-              block_id: 'loaded_incidents',
-              elements: [
-                {
-                  action_id: 'loaded_incidents',
-                  type: "static_select",
-                  options: loadedIncidentsOptions
-                }
-              ]
-            }
-          ],
-          submit: {
-            type: 'plain_text',
-            text: 'Update'
-          },
-          private_metadata: JSON.stringify({ incidents: queryResult.rows })
-        }
-      });
-      logger.info(result);
+      if (queryResult.rowCount > 0) {
+        await client.views.open({
+          trigger_id: body.trigger_id,
+          view: {
+            type: 'modal',
+            callback_id: 'update',
+            title: {
+              type: 'plain_text',
+              text: 'Update an incident'
+            },
+            blocks: [
+              {
+                type: "actions",
+                block_id: 'loaded_incidents',
+                elements: [
+                  {
+                    action_id: 'loaded_incidents',
+                    type: "static_select",
+                    options: loadedIncidentsOptions
+                  }
+                ]
+              }
+            ],
+            submit: {
+              type: 'plain_text',
+              text: 'Update'
+            },
+            private_metadata: JSON.stringify({ incidents: queryResult.rows })
+          }
+        });
+      } else {
+        // Message the user
+        await client.chat.postMessage({
+          channel: body.user_id,
+          text: 'There are no incidents! Create one using `/create`'
+        });
+      }
     }
     catch (error) {
       logger.error(error);
