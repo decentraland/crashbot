@@ -1,4 +1,4 @@
-name: Build, publish and deploy in dev
+name: Publish and deploy in dev environment
 
 on:
   workflow_dispatch:
