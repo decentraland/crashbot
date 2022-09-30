@@ -1,0 +1,14 @@
+name: Build, publish and deploy in dev
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cd:
+    uses: decentraland/actions/.github/workflows/build-quay-main.yml@main
+    with:
+      service-name: crashbot
+      deployment-environment: dev
+    secrets:
+      QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+      QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
