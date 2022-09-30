@@ -56,8 +56,8 @@ export type Status = 'open' | 'closed';
 export type IncidentRow = {
   id: number,
   update_number: number,
-  blame: string,
-  created_at: Date,
+  modified_by: string,
+  modified_at: Date,
   reported_at: Date,
   closed_at: Date,
   status: Status,

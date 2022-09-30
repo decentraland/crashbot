@@ -11,8 +11,8 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.createTable(tableName, {
     id: { type: 'SERIAL', notNull: true },
     update_number: { type: 'SMALLINT', notNull: true},
-    blame: { type: 'TEXT', notNull: true },
-    created_at: {
+    modified_by: { type: 'TEXT', notNull: true },
+    modified_at: {
       type: 'TIMESTAMP',
       notNull: true,
       default: pgm.func('NOW()'),

@@ -11,8 +11,8 @@ export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt"
     SQL`SELECT 
           m.id,
           m.update_number,
-          m.blame,
-          m.created_at,
+          m.modified_by,
+          m.modified_at,
           m.reported_at,
           m.closed_at,
           m.status, 
@@ -41,7 +41,7 @@ export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt"
   const incidents = queryResult.rows.map(async (incident) => {
     incident.contact = await getUsername(bolt.app, userToken, incident.contact)
     incident.point = await getUsername(bolt.app, userToken, incident.point)
-    incident.blame = await getUsername(bolt.app, userToken, incident.blame)
+    incident.modified_by = await getUsername(bolt.app, userToken, incident.modified_by)
     if (incident.status == 'open')
       response.open.push(incident)
     else

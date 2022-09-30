@@ -76,8 +76,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       // Save to DB
       const queryResult = await pg.query(
         SQL`INSERT INTO incidents(
-          blame,
           update_number,
+          modified_by,
           severity,
           title,
           description,
@@ -86,8 +86,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
           contact,
           reported_at
         ) VALUES (
-          ${user},
           0,
+          ${user},
           ${severity},
           ${title},
           ${description},
@@ -291,7 +291,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
         SQL`INSERT INTO incidents(
           id,
           update_number,
-          blame,
+          modified_by,
           severity,
           title,
           description,
