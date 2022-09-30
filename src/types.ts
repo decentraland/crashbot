@@ -1,4 +1,5 @@
-import { PlainTextOption } from "@slack/bolt"
+import { App, PlainTextOption } from "@slack/bolt"
+import { StringIndexed } from "@slack/bolt/dist/types/helpers"
 import type { IFetchComponent } from "@well-known-components/http-server"
 import type {
   IConfigComponent,
@@ -21,7 +22,7 @@ export type BaseComponents = {
   server: IHttpServerComponent<GlobalContext>
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
-  bolt: IBaseComponent
+  bolt: BoltComponent
   pg: IPgComponent
 }
 
@@ -81,4 +82,8 @@ export type IncidentViewOptions = {
   contact: string,
   rcaLink?: string,
   submitButtonText: string
+}
+
+export type BoltComponent = IBaseComponent & {
+  app: App<StringIndexed>
 }

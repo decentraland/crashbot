@@ -1,11 +1,15 @@
 import { IBaseComponent } from "@well-known-components/interfaces";
 import { ActionsBlock, App, BlockAction, Datepicker, InputBlock, PlainTextElement, PlainTextInput, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View, ViewStateValue } from '@slack/bolt';
-import { AppComponents, IncidentRow, IncidentViewOptions } from "../types";
+import { AppComponents, BoltComponent, IncidentRow, IncidentViewOptions } from "../types";
 import SQL from "sql-template-strings";
+import { getUsername } from "../logic/slack";
 
-export async function createBoltComponent(components: Pick<AppComponents, 'pg' | 'config'>): Promise<IBaseComponent> {
+export async function createBoltComponent(components: Pick<AppComponents, 'pg' | 'config'>): Promise<BoltComponent> {
 
   const { pg, config } = components
+
+  // Token needed to translate user ids to usernames
+  const userToken = await config.getString('SLACK_USER_TOKEN') ?? ''
 
   // Initializes your app with your bot token and signing secret
   const app = new App({
@@ -22,7 +26,6 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
   
     try {
       const now = new Date()
-      console.log(now.getHours() + ':' + now.getMinutes())
 
       // Call views.open with the built-in client
       const result = await client.views.open({
@@ -99,8 +102,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       let msg = 'Incident created succesfully with the following data:\n\n';
       msg += `*severity:* ${severity}\n`
       msg += `*report date and time:* ${reportDate}   ${reportTime}hs\n`
-      msg += `*point:* ${point}\n`
-      msg += `*contact:* ${contact}\n`
+      msg += `*point:* ${await getUsername(app, userToken, point)}\n`
+      msg += `*contact:* ${await getUsername(app, userToken, contact)}\n`
       msg += `*title:* ${title}\n`
       msg += `*description:* ${description}\n`
 
@@ -142,8 +145,6 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
             ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number;
         `
       )
-
-      console.log(queryResult)
 
       // Build options for the incidents menu
       const loadedIncidentsOptions: PlainTextOption[] = []
@@ -273,16 +274,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       const allIncidents = metadata.incidents as IncidentRow[]
       const selectedIncident = allIncidents.filter( incident => (incident.id == metadata.selected_incident_id))[0]
 
-      console.log('--------------------------- view ---------------------------')
-      console.log(view)
-      console.log('--------------------------- values ---------------------------')
-      console.log(values)
-      console.log(status)
-
       const user = body['user']['id'];
-
-      console.log('selected incident:')
-      console.log(selectedIncident)
 
       // Build dates
       const reportedAt = "'" + reportDate + " " + reportTime + ":00'"
@@ -327,8 +319,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       if (closedAt)
         msg += `*resolution date and time:* ${resolutionDate}  ${resolutionTime}hs\n`
       
-      msg += `*point:* ${point}\n`
-      msg += `*contact:* ${contact}\n`
+      msg += `*point:* ${await getUsername(app, userToken, point)}\n`
+      msg += `*contact:* ${await getUsername(app, userToken, contact)}\n`
       msg += `*title:* ${title}\n`
       msg += `*description:* ${description}\n`
       msg += `*status:* ${status?.text.text}\n`
@@ -357,7 +349,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
   return {
     start,
-    stop
+    stop,
+    app
   }
 }
 
@@ -698,4 +691,3 @@ function getIncidentView(options: IncidentViewOptions): View {
 
   return view
 }
-

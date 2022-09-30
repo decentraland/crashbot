@@ -1,15 +1,18 @@
 import SQL from "sql-template-strings"
 import { AppComponents, IncidentRow } from "../types"
+import { getUsername } from "./slack"
 
-export async function getIncidents(components: Pick<AppComponents, "pg">) {
+export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt" | "config">) {
 
-    const { pg } = components
+    const { pg, bolt, config } = components
 
    // Get all incidents
    const queryResult = await pg.query<IncidentRow>(
     SQL`SELECT 
           m.id,
           m.update_number,
+          m.blame,
+          m.created_at,
           m.reported_at,
           m.closed_at,
           m.status, 
@@ -32,12 +35,19 @@ export async function getIncidents(components: Pick<AppComponents, "pg">) {
     open: [] as IncidentRow[],
     closed: [] as IncidentRow[]
   }
-  queryResult.rows.forEach((incident) => {
+
+  const userToken = await config.getString('SLACK_USER_TOKEN') ?? ''
+
+  const incidents = queryResult.rows.map(async (incident) => {
+    incident.contact = await getUsername(bolt.app, userToken, incident.contact)
+    incident.point = await getUsername(bolt.app, userToken, incident.point)
+    incident.blame = await getUsername(bolt.app, userToken, incident.blame)
     if (incident.status == 'open')
       response.open.push(incident)
     else
       response.closed.push(incident)
   })
+  await Promise.all(incidents)
 
   return response
 }
