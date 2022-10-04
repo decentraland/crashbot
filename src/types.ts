@@ -51,7 +51,7 @@ export type HandlerContextWithPath<
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
 
 export type Severity = 'sev-1' | 'sev-2' | 'sev-3' | 'sev-4' | 'sev-5';
-export type Status = 'open' | 'closed';
+export type Status = 'open' | 'closed' | 'invalid';
 
 export type IncidentRow = {
   id: number,

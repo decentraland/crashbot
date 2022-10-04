@@ -7,7 +7,7 @@ const tableName = 'incidents'
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.createType('severity', ['sev-1','sev-2','sev-3','sev-4','sev-5'])
-  pgm.createType('status', ['open', 'closed'])
+  pgm.createType('status', ['open', 'closed', 'invalid'])
   pgm.createTable(tableName, {
     id: { type: 'SERIAL', notNull: true },
     update_number: { type: 'SMALLINT', notNull: true},

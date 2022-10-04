@@ -152,7 +152,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
         loadedIncidentsOptions.push({
           text: {
             type: 'plain_text',
-            text: `${incident.status == 'closed' ? '✅ ' : '❌ '} DCL-${incident.id} ${incident.title}`,
+            text: `${getEmoji(incident)} DCL-${incident.id} ${incident.title}`,
             emoji: true
           },
           value: incident.id.toString()
@@ -424,7 +424,7 @@ const statusOptions = {
   'open': {
     text: {
       type: "plain_text",
-      text: "Open ❌",
+      text: "Open 🚨",
       emoji: true
     },
     value: "open"
@@ -437,6 +437,14 @@ const statusOptions = {
     },
     value: "closed"
   },
+  'invalid': {
+    text: {
+      type: "plain_text",
+      text: "Invalid 🚫",
+      emoji: true
+    },
+    value: "invalid"
+  }
 }
 
 function getIncidentView(options: IncidentViewOptions): View {

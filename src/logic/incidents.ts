@@ -51,3 +51,13 @@ export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt"
 
   return response
 }
+
+export function getEmoji(incident: IncidentRow): string {
+  if (incident.status == 'closed')
+    return '✅'
+    
+  if (incident.status == 'open')
+    return '🚨'
+
+  return '🚫'
+}
