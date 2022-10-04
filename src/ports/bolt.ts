@@ -3,6 +3,7 @@ import { ActionsBlock, App, BlockAction, Datepicker, InputBlock, PlainTextElemen
 import { AppComponents, BoltComponent, IncidentRow, IncidentViewOptions } from "../types";
 import SQL from "sql-template-strings";
 import { getUsername } from "../logic/slack";
+import { getEmoji } from "../logic/incidents";
 
 export async function createBoltComponent(components: Pick<AppComponents, 'pg' | 'config'>): Promise<BoltComponent> {
 
