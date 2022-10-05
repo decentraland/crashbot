@@ -15,11 +15,6 @@ export async function listHandler(context: Pick<HandlerContextWithPath<"metrics"
   const incidents = await getIncidents(context.components)
   return {
     status: 200,
-    body: incidents,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'DELETE,GET,PATCH,POST,PUT,OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type,Authorization'
-    }
+    body: incidents
   }
 }
