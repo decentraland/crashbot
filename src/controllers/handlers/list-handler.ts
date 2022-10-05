@@ -5,7 +5,7 @@ import { HandlerContextWithPath } from "../../types"
 export async function listHandler(context: Pick<HandlerContextWithPath<"metrics" | "pg" | "bolt" | "config", "/list">, "url" | "components">) {
   const {
     url,
-    components: { metrics },
+    components: { metrics }
   } = context
 
   metrics.increment("list_counter", {
@@ -13,9 +13,11 @@ export async function listHandler(context: Pick<HandlerContextWithPath<"metrics"
   })
 
   const incidents = await getIncidents(context.components)
-  
   return {
     status: 200,
-    body: incidents
+    body: incidents,
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    }
   }
 }
