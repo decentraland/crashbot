@@ -19,7 +19,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
   });
 
   // Listens to create command
-  app.command('/create', async ({ ack, body, client, logger }) => {
+  app.command('/create-incident', async ({ ack, body, client, logger }) => {
     // Acknowledge command request
     await ack();
   
@@ -122,7 +122,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
   });
 
-  app.command('/update', async ({ ack, body, client, logger }) => {
+  app.command('/update-incident', async ({ ack, body, client, logger }) => {
     // Acknowledge command request
     await ack();
   
