@@ -10,8 +10,6 @@ export async function getUsername(app: App<StringIndexed>, userToken: string, us
       token: userToken
     })
 
-    console.log(response)
-
     if (response.profile?.real_name)
       username = response.profile?.real_name as string
   }

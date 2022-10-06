@@ -94,13 +94,17 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
           ${point},
           ${contact},
           ${reportedAt}
-        )`
+        )
+        RETURNING id`
       )
+
+      const addedIncident = queryResult.rows[0] as { id: string };
 
       // Message to send user
       let msg = 'Incident created succesfully with the following data:\n\n';
+      msg += `*Id:* DCL-${addedIncident.id}\n`
       msg += `*Severity:* ${severity}\n`
-      msg += `*Report date and time:* ${reportDate}   ${reportTime}hs\n`
+      msg += `*Report date and time:* ${reportDate}  ${reportTime}hs\n`
       msg += `*Point:* <@${point}>\n`
       msg += `*Contact:* <@${contact}>\n`
       msg += `*Title:* ${title}\n`
@@ -318,6 +322,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
       // Build message to send to user
       let msg = 'Incident updated succesfully with the following data:\n\n';
+      msg += `*Id:* DCL-${selectedIncident.id}\n`
       msg += `*Severity:* ${severity?.text.text}\n`
       msg += `*Report date and time:* ${reportDate}  ${reportTime}hs\n`
 
