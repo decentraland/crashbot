@@ -1,5 +1,4 @@
-import { IBaseComponent } from "@well-known-components/interfaces";
-import { ActionsBlock, App, BlockAction, Datepicker, InputBlock, PlainTextElement, PlainTextInput, PlainTextOption, SectionBlock, Select, SlackAction, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View, ViewStateValue } from '@slack/bolt';
+import { App, BlockAction, Datepicker, PlainTextInput, PlainTextOption, SectionBlock, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View } from '@slack/bolt';
 import { AppComponents, BoltComponent, IncidentRow, IncidentViewOptions } from "../types";
 import SQL from "sql-template-strings";
 import { getUsername } from "../logic/slack";
@@ -101,12 +100,12 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
       // Message to send user
       let msg = 'Incident created succesfully with the following data:\n\n';
-      msg += `*severity:* ${severity}\n`
-      msg += `*report date and time:* ${reportDate}   ${reportTime}hs\n`
-      msg += `*point:* ${await getUsername(app, userToken, point)}\n`
-      msg += `*contact:* ${await getUsername(app, userToken, contact)}\n`
-      msg += `*title:* ${title}\n`
-      msg += `*description:* ${description}\n`
+      msg += `*Severity:* ${severity}\n`
+      msg += `*Report date and time:* ${reportDate}   ${reportTime}hs\n`
+      msg += `*Point:* ${await getUsername(app, userToken, point)}\n`
+      msg += `*Contact:* ${await getUsername(app, userToken, contact)}\n`
+      msg += `*Title:* ${title}\n`
+      msg += `*Description:* ${description}\n`
 
       // Message the user    
       await client.chat.postMessage({
@@ -320,17 +319,17 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
       // Build message to send to user
       let msg = 'Incident updated succesfully with the following data:\n\n';
-      msg += `*severity:* ${severity?.text.text}\n`
-      msg += `*report date and time:* ${reportDate}  ${reportTime}hs\n`
+      msg += `*Severity:* ${severity?.text.text}\n`
+      msg += `*Report date and time:* ${reportDate}  ${reportTime}hs\n`
 
       if (closedAt)
-        msg += `*resolution date and time:* ${resolutionDate}  ${resolutionTime}hs\n`
+        msg += `*Resolution date and time:* ${resolutionDate}  ${resolutionTime}hs\n`
       
-      msg += `*point:* ${await getUsername(app, userToken, point)}\n`
-      msg += `*contact:* ${await getUsername(app, userToken, contact)}\n`
-      msg += `*title:* ${title}\n`
-      msg += `*description:* ${description}\n`
-      msg += `*status:* ${status?.text.text}\n`
+      msg += `*Point:* ${await getUsername(app, userToken, point)}\n`
+      msg += `*Contact:* ${await getUsername(app, userToken, contact)}\n`
+      msg += `*Title:* ${title}\n`
+      msg += `*Description:* ${description}\n`
+      msg += `*Status:* ${status?.text.text}\n`
 
       if (rcaLink)
         msg += `*RCA link:* ${rcaLink}`
