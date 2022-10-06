@@ -350,7 +350,10 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
     console.log('⚡️ Bolt app is running!');
   }
 
-  async function stop() {}
+  async function stop() {
+    await app.stop()
+    console.log('⚡️ Bolt app has stopped!')
+  }
 
   return {
     start,
