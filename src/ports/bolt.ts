@@ -132,15 +132,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
         SQL`SELECT 
               m.id,
               m.update_number,
-              m.reported_at,
-              m.closed_at,
               m.status, 
-              m.severity,
-              m.title,
-              m.description,
-              m.point,
-              m.contact,
-              m.rca_link
+              m.title
             FROM (
               SELECT id, MAX(update_number) AS last
               FROM incidents
@@ -188,8 +181,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
             submit: {
               type: 'plain_text',
               text: 'Update'
-            },
-            private_metadata: JSON.stringify({ incidents: queryResult.rows })
+            }
           }
         });
       } else {
@@ -215,6 +207,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       const action = blockActionBody.actions[0] as StaticSelectAction;
       const selectIncidentId = action.selected_option.value
 
+      // Get last update for selected incident
       const queryResult = await pg.query<IncidentRow>(
         SQL`SELECT * FROM incidents WHERE id = ${selectIncidentId} ORDER BY update_number DESC LIMIT 1;`
       )
@@ -236,12 +229,9 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
         rcaLink: incident.rca_link
       });
 
-      // Parse metadata
-      const metadata = JSON.parse(previousView?.private_metadata ?? '{}')
-      
-      // Add the selected incdent's id to the metadata
-      metadata.selected_incident_id = selectIncidentId
-      
+      // Add selected incident to metadata
+      const metadata = { selectedIncident: incident }
+
       // Pass the data about all the incidents
       newView.private_metadata = JSON.stringify(metadata)
       
@@ -280,8 +270,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
       // Get metadata from modal
       const metadata = JSON.parse(view.private_metadata)
-      const allIncidents = metadata.incidents as IncidentRow[]
-      const selectedIncident = allIncidents.filter( incident => (incident.id == metadata.selected_incident_id))[0]
+      const selectedIncident = metadata.selectedIncident as IncidentRow
 
       const user = body['user']['id'];
 
