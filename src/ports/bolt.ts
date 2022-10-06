@@ -1,7 +1,6 @@
 import { App, BlockAction, Datepicker, PlainTextInput, PlainTextOption, SectionBlock, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View } from '@slack/bolt';
 import { AppComponents, BoltComponent, IncidentRow, IncidentViewOptions } from "../types";
 import SQL from "sql-template-strings";
-import { getUsername } from "../logic/slack";
 import { getEmoji } from "../logic/incidents";
 
 export async function createBoltComponent(components: Pick<AppComponents, 'pg' | 'config'>): Promise<BoltComponent> {
@@ -102,8 +101,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       let msg = 'Incident created succesfully with the following data:\n\n';
       msg += `*Severity:* ${severity}\n`
       msg += `*Report date and time:* ${reportDate}   ${reportTime}hs\n`
-      msg += `*Point:* ${await getUsername(app, userToken, point)}\n`
-      msg += `*Contact:* ${await getUsername(app, userToken, contact)}\n`
+      msg += `*Point:* <@${point}>\n`
+      msg += `*Contact:* <@${contact}>\n`
       msg += `*Title:* ${title}\n`
       msg += `*Description:* ${description}\n`
 
@@ -325,8 +324,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       if (closedAt)
         msg += `*Resolution date and time:* ${resolutionDate}  ${resolutionTime}hs\n`
       
-      msg += `*Point:* ${await getUsername(app, userToken, point)}\n`
-      msg += `*Contact:* ${await getUsername(app, userToken, contact)}\n`
+      msg += `*Point:* <@${point}>\n`
+      msg += `*Contact:* <@${contact}>\n`
       msg += `*Title:* ${title}\n`
       msg += `*Description:* ${description}\n`
       msg += `*Status:* ${status?.text.text}\n`
