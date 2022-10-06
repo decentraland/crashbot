@@ -7,10 +7,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
   const { pg, config } = components
 
-  // Token needed to translate user ids to usernames
-  const userToken = await config.getString('SLACK_USER_TOKEN') ?? ''
-
-  // Initializes your app with your bot token and signing secret
+  // Initialize app
   const app = new App({
     token: await config.getString('SLACK_BOT_TOKEN') ?? '',
     signingSecret: await config.getString('SLACK_SIGNING_SECRET') ?? '',
@@ -18,8 +15,12 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
     appToken: await config.getString('SLACK_APP_TOKEN') ?? ''
   });
 
+  // Commands are retrieved from environment for local testing
+  const createCommand = await config.getString('CREATE_COMMAND') ?? '/create-incident';
+  const updateCommand = await config.getString('UPDATE_COMMAND') ?? '/update-incident';
+
   // Listens to create command
-  app.command('/create-incident', async ({ ack, body, client, logger }) => {
+  app.command(createCommand, async ({ ack, body, client, logger }) => {
     // Acknowledge command request
     await ack();
   
@@ -122,7 +123,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
   });
 
-  app.command('/update-incident', async ({ ack, body, client, logger }) => {
+  app.command(updateCommand, async ({ ack, body, client, logger }) => {
     // Acknowledge command request
     await ack();
   
