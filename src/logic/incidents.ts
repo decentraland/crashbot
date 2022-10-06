@@ -1,6 +1,6 @@
 import SQL from "sql-template-strings"
 import { AppComponents, IncidentRow } from "../types"
-import { getUsername } from "./slack"
+import { getRealNameFromAPI } from "./slack"
 
 export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt" | "config">) {
 
@@ -39,9 +39,9 @@ export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt"
   const userToken = await config.getString('SLACK_USER_TOKEN') ?? ''
 
   const incidents = queryResult.rows.map(async (incident) => {
-    incident.contact = await getUsername(bolt.app, userToken, incident.contact)
-    incident.point = await getUsername(bolt.app, userToken, incident.point)
-    incident.modified_by = await getUsername(bolt.app, userToken, incident.modified_by)
+    incident.contact = await getRealNameFromAPI(bolt.app, userToken, incident.contact)
+    incident.point = await getRealNameFromAPI(bolt.app, userToken, incident.point)
+    incident.modified_by = await getRealNameFromAPI(bolt.app, userToken, incident.modified_by)
     if (incident.status == 'open')
       response.open.push(incident)
     else
@@ -59,5 +59,6 @@ export function getEmoji(incident: IncidentRow): string {
   if (incident.status == 'open')
     return '🚨'
 
+  // Emoji for invalid incidents
   return '🚫'
 }
