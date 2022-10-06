@@ -111,6 +111,12 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       msg += `*Title:* ${title}\n`
       msg += `*Description:* ${description}\n`
 
+      // Message the #crash channel
+      await client.chat.postMessage({
+        channel: 'crash',
+        text: msg
+      });
+
       // Message the user    
       await client.chat.postMessage({
         channel: user,
@@ -328,7 +334,13 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       if (rcaLink)
         msg += `*RCA link:* ${rcaLink}`
 
-      // Message the user    
+      // Message the #crash channel
+      await client.chat.postMessage({
+        channel: 'crash',
+        text: msg
+      });
+
+      // Message the user
       await client.chat.postMessage({
         channel: user,
         text: msg
