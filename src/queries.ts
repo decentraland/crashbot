@@ -71,6 +71,19 @@ export function GET_LAST_UPDATE_OF_SELECTED_INCIDENT(selectedIncidentId: string)
   return SQL`SELECT * FROM incidents WHERE id = ${selectedIncidentId} ORDER BY update_number DESC LIMIT 1;`
 }
 
+export const GET_LAST_UPDATE_OF_OPEN_INCIDENTS = 
+  SQL`SELECT 
+    m.id,
+    m.update_number,
+    m.title
+  FROM (
+    SELECT id, MAX(update_number) AS last
+    FROM incidents
+    GROUP BY id
+  ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number
+  WHERE status = 'open'
+`
+
 export function UPDATE_INCIDENT(
   id: number,
   update_number: number,

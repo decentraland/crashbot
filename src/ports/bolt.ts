@@ -1,10 +1,10 @@
 import { App, BlockAction, Datepicker, PlainTextInput, PlainTextOption, SectionBlock, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View } from '@slack/bolt';
 import { AppComponents, BoltComponent, IncidentRow, IncidentViewOptions } from "../types";
 import { getEmoji } from "../logic/incidents";
-import { getusername } from '../logic/slack';
+import { getusername, updateChannelTopic } from '../logic/slack';
 import { CREATE_INCIDENT, GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS, GET_LAST_UPDATE_OF_SELECTED_INCIDENT, UPDATE_INCIDENT } from '../queries';
 
-export async function createBoltComponent(components: Pick<AppComponents, 'pg' | 'config'>): Promise<BoltComponent> {
+export async function createBoltComponent(components: Pick<AppComponents, 'pg' | 'config' | 'logs'>): Promise<BoltComponent> {
 
   const { pg, config } = components
 
@@ -100,6 +100,9 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
         channel: user,
         text: msg
       });
+
+      // Update channel topic
+      updateChannelTopic(components, app)
     }
     catch (error) {
       logger.error(error);
@@ -107,6 +110,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
   });
 
+  // Listens to update command
   app.command(updateCommand, async ({ ack, body, client, logger }) => {
     // Acknowledge command request
     await ack();
@@ -296,6 +300,9 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
         channel: user,
         text: msg
       });
+
+      // Update channel topic
+      updateChannelTopic(components, app)
     }
     catch (error) {
       logger.error(error);
