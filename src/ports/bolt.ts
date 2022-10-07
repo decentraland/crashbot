@@ -528,7 +528,8 @@ function getIncidentView(options: IncidentViewOptions): View {
             type: "plain_text",
             text: "Summary of the incident"
           },
-          initial_value: options.title
+          initial_value: options.title,
+          max_length: 70
         }
       },
       // Description
@@ -547,7 +548,8 @@ function getIncidentView(options: IncidentViewOptions): View {
             text: "Describe the incident and steps to reproduce"
           },
           multiline: true,
-          initial_value: options.description
+          initial_value: options.description,
+          max_length: 2000
         }
       }
     ],
