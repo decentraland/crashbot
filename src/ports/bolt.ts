@@ -658,7 +658,8 @@ function getIncidentView(options: IncidentViewOptions): View {
         placeholder: {
           type: "plain_text",
           text: "Paste a link to the RCA"
-        }
+        },
+        max_length: 70
       } as PlainTextInput,
       optional: true
     }

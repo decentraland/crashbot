@@ -31,7 +31,6 @@ export async function updateChannelTopic(components: Pick<AppComponents, "pg" | 
   try {
     // Get open incidents
     const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_OPEN_INCIDENTS)
-    console.log(queryResult)
     
     // Build channel topic
     let topic = ''
@@ -56,7 +55,6 @@ export async function updateChannelTopic(components: Pick<AppComponents, "pg" | 
       topic: topic
     })
 
-    console.log(topic)
   } catch(error) {
     logs.getLogger('slack').error("Error while trying to update the channel's topic")
     console.error(error)
