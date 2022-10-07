@@ -1,34 +1,15 @@
-import SQL from "sql-template-strings"
+import { GET_LAST_UPDATE_OF_ALL_INCIDENTS } from "../queries"
 import { AppComponents, IncidentRow } from "../types"
 import { getRealNameFromAPI } from "./slack"
 
+
+
 export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt" | "config">) {
 
-    const { pg, bolt, config } = components
+  const { pg, bolt, config } = components
 
-   // Get all incidents
-   const queryResult = await pg.query<IncidentRow>(
-    SQL`SELECT 
-          m.id,
-          m.update_number,
-          m.modified_by,
-          m.modified_at,
-          m.reported_at,
-          m.closed_at,
-          m.status, 
-          m.severity,
-          m.title,
-          m.description,
-          m.point,
-          m.contact,
-          m.rca_link
-        FROM (
-          SELECT id, MAX(update_number) AS last
-          FROM incidents
-          GROUP BY id
-        ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number;
-    `
-  )
+  // Get all incidents
+  const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_ALL_INCIDENTS)
 
   // Separate open incidents from closed ones
   const response = {

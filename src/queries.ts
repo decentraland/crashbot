@@ -1,0 +1,115 @@
+import SQL, { SQLStatement } from "sql-template-strings";
+
+export function CREATE_INCIDENT(user: string,
+  severity: string | undefined,
+  title: string | undefined | null,
+  description: string | undefined | null,
+  point: string | undefined | null,
+  contact: string | undefined | null,
+  reportedAt: string
+): SQLStatement {
+  return SQL`INSERT INTO incidents(
+    update_number,
+    modified_by,
+    severity,
+    title,
+    description,
+    status,
+    point,
+    contact,
+    reported_at
+  ) VALUES (
+    0,
+    ${user},
+    ${severity},
+    ${title},
+    ${description},
+    'open',
+    ${point},
+    ${contact},
+    ${reportedAt}
+  )
+  RETURNING id`
+}
+
+export const GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS = 
+  SQL`SELECT 
+    m.id,
+    m.update_number,
+    m.status, 
+    m.title
+  FROM (
+    SELECT id, MAX(update_number) AS last
+    FROM incidents
+    GROUP BY id
+  ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number;
+`
+
+export const GET_LAST_UPDATE_OF_ALL_INCIDENTS = 
+  SQL`SELECT 
+    m.id,
+    m.update_number,
+    m.modified_by,
+    m.modified_at,
+    m.reported_at,
+    m.closed_at,
+    m.status, 
+    m.severity,
+    m.title,
+    m.description,
+    m.point,
+    m.contact,
+    m.rca_link
+  FROM (
+    SELECT id, MAX(update_number) AS last
+    FROM incidents
+    GROUP BY id
+  ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number;
+`
+
+export function GET_LAST_UPDATE_OF_SELECTED_INCIDENT(selectedIncidentId: string) {
+  return SQL`SELECT * FROM incidents WHERE id = ${selectedIncidentId} ORDER BY update_number DESC LIMIT 1;`
+}
+
+export function UPDATE_INCIDENT(
+  id: number,
+  update_number: number,
+  user: string,
+  severity: string | undefined,
+  title: string | undefined | null,
+  description: string | undefined | null,
+  point: string | undefined | null,
+  contact: string | undefined | null,
+  reportedAt: string,
+  status: string | undefined,
+  closedAt: string | null,
+  rcaLink: string | null | undefined
+) {
+  return SQL`INSERT INTO incidents(
+    id,
+    update_number,
+    modified_by,
+    severity,
+    title,
+    description,
+    status,
+    point,
+    contact,
+    reported_at,
+    closed_at,
+    rca_link
+  ) VALUES (
+    ${id},
+    ${update_number},
+    ${user},
+    ${severity},
+    ${title},
+    ${description},
+    ${status},
+    ${point},
+    ${contact},
+    ${reportedAt},
+    ${closedAt},
+    ${rcaLink}
+  )`
+}

@@ -1,8 +1,8 @@
 import { App, BlockAction, Datepicker, PlainTextInput, PlainTextOption, SectionBlock, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View } from '@slack/bolt';
 import { AppComponents, BoltComponent, IncidentRow, IncidentViewOptions } from "../types";
-import SQL from "sql-template-strings";
 import { getEmoji } from "../logic/incidents";
 import { getusername } from '../logic/slack';
+import { CREATE_INCIDENT, GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS, GET_LAST_UPDATE_OF_SELECTED_INCIDENT, UPDATE_INCIDENT } from '../queries';
 
 export async function createBoltComponent(components: Pick<AppComponents, 'pg' | 'config'>): Promise<BoltComponent> {
 
@@ -75,30 +75,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       // const reportedAt = "'2022-09-26 10:18:00.000'"
 
       // Save to DB
-      const queryResult = await pg.query(
-        SQL`INSERT INTO incidents(
-          update_number,
-          modified_by,
-          severity,
-          title,
-          description,
-          status,
-          point,
-          contact,
-          reported_at
-        ) VALUES (
-          0,
-          ${user},
-          ${severity},
-          ${title},
-          ${description},
-          'open',
-          ${point},
-          ${contact},
-          ${reportedAt}
-        )
-        RETURNING id`
-      )
+      const queryResult = await pg.query(CREATE_INCIDENT(user, severity, title, description, point, contact, reportedAt))
 
       const addedIncident = queryResult.rows[0] as { id: string };
 
@@ -136,19 +113,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
   
     try {
       // Get all incidents
-      const queryResult = await pg.query<IncidentRow>(
-        SQL`SELECT 
-              m.id,
-              m.update_number,
-              m.status, 
-              m.title
-            FROM (
-              SELECT id, MAX(update_number) AS last
-              FROM incidents
-              GROUP BY id
-            ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number;
-        `
-      )
+      const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS)
 
       // Build options for the incidents menu
       const loadedIncidentsOptions: PlainTextOption[] = []
@@ -213,12 +178,10 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       const blockActionBody = body as BlockAction
       const previousView = blockActionBody.view
       const action = blockActionBody.actions[0] as StaticSelectAction;
-      const selectIncidentId = action.selected_option.value
+      const selectedIncidentId = action.selected_option.value
 
       // Get last update for selected incident
-      const queryResult = await pg.query<IncidentRow>(
-        SQL`SELECT * FROM incidents WHERE id = ${selectIncidentId} ORDER BY update_number DESC LIMIT 1;`
-      )
+      const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_SELECTED_INCIDENT(selectedIncidentId))
   
       // Build the new view
       const incident = queryResult.rows[0]
@@ -288,33 +251,20 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
       // Save to DB
       const queryResult = await pg.query(
-        SQL`INSERT INTO incidents(
-          id,
-          update_number,
-          modified_by,
-          severity,
+        UPDATE_INCIDENT(
+          selectedIncident.id,
+          selectedIncident.update_number + 1,
+          user,
+          severity?.value,
           title,
           description,
-          status,
           point,
           contact,
-          reported_at,
-          closed_at,
-          rca_link
-        ) VALUES (
-          ${selectedIncident.id},
-          ${selectedIncident.update_number + 1},
-          ${user},
-          ${severity?.value},
-          ${title},
-          ${description},
-          ${status?.value},
-          ${point},
-          ${contact},
-          ${reportedAt},
-          ${closedAt},
-          ${rcaLink}
-        )`
+          reportedAt,
+          status?.value,
+          closedAt,
+          rcaLink
+        )
       )
 
       // Build message to send to user
