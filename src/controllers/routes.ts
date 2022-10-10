@@ -1,4 +1,6 @@
-import { Router } from "@well-known-components/http-server"
+import { FullHttpServerComponent, RoutedContext, Router } from "@well-known-components/http-server"
+import { IHttpServerComponent } from "@well-known-components/interfaces"
+import { validateAPIKey } from "../logic/validation"
 import { GlobalContext } from "../types"
 import { listHandler } from "./handlers/list-handler"
 import { pingHandler } from "./handlers/ping-handler"
@@ -8,7 +10,9 @@ export async function setupRouter(globalContext: GlobalContext): Promise<Router<
   const router = new Router<GlobalContext>()
 
   router.get("/ping", pingHandler)
-  router.get("/list", listHandler)
+  router.get("/list", validateAPIKey(globalContext), listHandler)
 
   return router
 }
+
+
