@@ -8,8 +8,11 @@ export function validateAPIKey(globalContext: GlobalContext): IHttpServerCompone
     const apiKeyFromEnv = await globalContext.components.config.getString('API_KEY') ?? ''
     const originFromEnv = await globalContext.components.config.getString('URL_ORIGIN') ?? ''
     const apiKeyFromHeader = context.request.headers.get('crashbot')
+    const originFromHeader = context.request.headers.get('origin')
     // const logger = globalContext.components.logs.getLogger('Validate API Key')
     console.log(context.request.headers)
+    console.log(`apikey from header: ${apiKeyFromHeader}`)
+    console.log(`origin from header: ${originFromHeader}`)
 
     if (!apiKeyFromHeader) {
       console.log('403 Missing API Key')
@@ -21,7 +24,7 @@ export function validateAPIKey(globalContext: GlobalContext): IHttpServerCompone
     }
 
     if (apiKeyFromHeader != apiKeyFromEnv) {
-      console.log('403 Invalid API Key')
+      console.log(`403 Invalid API Key: prov ${apiKeyFromHeader} env ${apiKeyFromEnv}`)
       // return {
       //   status: 403,
       //   statusText: 'Not allowed. Invalid API key.',
@@ -29,8 +32,8 @@ export function validateAPIKey(globalContext: GlobalContext): IHttpServerCompone
       // }
     }
 
-    if (context.url.origin != originFromEnv) {
-      console.log('403 Invalid origin')
+    if (originFromHeader != originFromEnv) {
+      console.log(`403 Invalid origin prov ${originFromHeader} env ${originFromEnv}`)
       // return {
       //   status: 403,
       //   statusText: 'Origin is not allowed.',
