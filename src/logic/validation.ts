@@ -35,9 +35,3 @@ export function validate(globalContext: GlobalContext): IHttpServerComponent.IRe
     return next()    
   }
 }
-
-
-
-function respondWithError(errorMessage: string) {
-
-}
