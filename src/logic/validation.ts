@@ -9,8 +9,7 @@ export function validateAPIKey(globalContext: GlobalContext): IHttpServerCompone
     const originFromEnv = await globalContext.components.config.getString('URL_ORIGIN') ?? ''
     const apiKeyFromHeader = context.request.headers.get('crashbot')
     // const logger = globalContext.components.logs.getLogger('Validate API Key')
-    console.log('URL data:')
-    console.log(context.url)
+    console.log(context.request.headers)
 
     if (!apiKeyFromHeader) {
       console.log('403 Missing API Key')
