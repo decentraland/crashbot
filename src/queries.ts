@@ -75,7 +75,9 @@ export const GET_LAST_UPDATE_OF_OPEN_INCIDENTS =
   SQL`SELECT 
     m.id,
     m.update_number,
-    m.title
+    m.title,
+    m.severity,
+    m.description
   FROM (
     SELECT id, MAX(update_number) AS last
     FROM incidents
