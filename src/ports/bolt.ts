@@ -539,7 +539,7 @@ function getIncidentView(options: IncidentViewOptions): View {
             text: "Summary of the incident"
           },
           initial_value: options.title,
-          max_length: 70
+          max_length: 65
         }
       },
       // Description
@@ -669,7 +669,7 @@ function getIncidentView(options: IncidentViewOptions): View {
           type: "plain_text",
           text: "Paste a link to the RCA"
         },
-        max_length: 70
+        max_length: 75
       } as PlainTextInput,
       optional: true
     }
