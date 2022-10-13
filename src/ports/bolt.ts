@@ -310,6 +310,16 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
   });
 
+  // Route the action_id of every input to a dummy handler that does nothing to avoid getting a warning signal on each of them
+  app.action('severity', ({ ack }) => ack())
+  app.action('report_date', ({ ack }) => ack())
+  app.action('report_time', ({ ack }) => ack())
+  app.action('point', ({ ack }) => ack())
+  app.action('contact', ({ ack }) => ack())
+  app.action('resolution_date', ({ ack }) => ack())
+  app.action('resolution_time', ({ ack }) => ack())
+  app.action('status', ({ ack }) => ack())
+
   async function start() {
     await app.start(process.env.PORT || 3000); 
     console.log('⚡️ Bolt app is running!');
