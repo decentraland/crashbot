@@ -401,7 +401,7 @@ const statusOptions = {
   'open': {
     text: {
       type: "plain_text",
-      text: "Open 🚨",
+      text: "🚨 Open",
       emoji: true
     },
     value: "open"
@@ -409,7 +409,7 @@ const statusOptions = {
   'closed': {
     text: {
       type: "plain_text",
-      text: "Closed ✅",
+      text: "✅ Closed",
       emoji: true
     },
     value: "closed"
@@ -417,7 +417,7 @@ const statusOptions = {
   'invalid': {
     text: {
       type: "plain_text",
-      text: "Invalid 🚫",
+      text: "🚫 Invalid",
       emoji: true
     },
     value: "invalid"
