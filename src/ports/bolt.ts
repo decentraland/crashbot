@@ -392,7 +392,7 @@ const severitiesOptions = {
     value: "sev-5",
     description: {
       type: "plain_text",
-      text: "Cosmetics issues or bugs"
+      text: "Cosmetics issue"
     }
   }
 }
