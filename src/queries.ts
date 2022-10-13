@@ -64,7 +64,8 @@ export const GET_LAST_UPDATE_OF_ALL_INCIDENTS =
     SELECT id, MAX(update_number) AS last
     FROM incidents
     GROUP BY id
-  ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number;
+  ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number
+  WHERE status != 'invalid';
 `
 
 export function GET_LAST_UPDATE_OF_SELECTED_INCIDENT(selectedIncidentId: string) {
