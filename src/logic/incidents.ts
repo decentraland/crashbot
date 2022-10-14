@@ -30,6 +30,13 @@ export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt"
   })
   await Promise.all(incidents)
 
+  // Sort open incidents by severity
+
+  // Sort closed incidents by report date
+  response.closed.sort((incident1: IncidentRow, incident2: IncidentRow) => {
+    return incident1.reported_at.getTime() - incident2.reported_at.getTime()
+  })
+  
   return response
 }
 
