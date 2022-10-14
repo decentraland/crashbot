@@ -455,7 +455,7 @@ function getIncidentView(options: IncidentViewOptions): View {
         block_id: "report_date",
         text: {
           type: "mrkdwn",
-          text: "Report date"
+          text: "Report date (UTC)"
         },
         accessory: {
           type: "datepicker",
@@ -473,7 +473,7 @@ function getIncidentView(options: IncidentViewOptions): View {
         block_id: "report_time",
         text: {
           type: "mrkdwn",
-          text: "Report time"
+          text: "Report time (UTC)"
         },
         accessory: {
           type: "timepicker",
@@ -587,7 +587,7 @@ function getIncidentView(options: IncidentViewOptions): View {
       block_id: "resolution_date",
       text: {
         type: "mrkdwn",
-        text: "Resolution date"
+        text: "Resolution date (UTC)"
       },
       accessory: {
         type: "datepicker",
@@ -605,7 +605,7 @@ function getIncidentView(options: IncidentViewOptions): View {
       block_id: "resolution_time",
       text: {
         type: "mrkdwn",
-        text: "Resolution time"
+        text: "Resolution time (UTC)"
       },
       accessory: {
         type: "timepicker",
