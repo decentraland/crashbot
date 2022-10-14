@@ -31,6 +31,16 @@ export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt"
   await Promise.all(incidents)
 
   // Sort open incidents by severity
+  response.open.sort((incident1: IncidentRow, incident2: IncidentRow) => {
+    const severity1 = parseInt(incident1.severity.at(-1) ?? '0')
+    const severity2 = parseInt(incident2.severity.at(-1) ?? '0')
+
+    // If the severity is matched, order by reported date, ascending
+    if(severity1 - severity2 == 0)
+      return incident1.reported_at.getTime() - incident2.reported_at.getTime()
+
+    return severity1 - severity2
+  })
 
   // Sort closed incidents by report date
   response.closed.sort((incident1: IncidentRow, incident2: IncidentRow) => {
