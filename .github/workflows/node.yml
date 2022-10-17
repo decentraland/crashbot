@@ -19,5 +19,7 @@ jobs:
         run: npm run build
       - name: install postgres
         run: sudo apt install postgresql
+      - name: create database
+        run: psql -c "CREATE DATABASE crashbot"
       - name: test
         run: npm run test
