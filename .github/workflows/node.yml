@@ -22,6 +22,6 @@ jobs:
       - name: start postgres
         run: sudo systemctl start postgresql.service
       - name: create database
-        run: psql -d template1 -c "CREATE DATABASE crashbot"
+        run: psql -U root -c "CREATE DATABASE crashbot"
       - name: test
         run: npm run test
