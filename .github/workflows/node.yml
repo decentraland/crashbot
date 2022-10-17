@@ -21,8 +21,6 @@ jobs:
         run: sudo apt install postgresql
       - name: start postgres
         run: sudo systemctl start postgresql.service
-      - name: look for file
-        run: psql -t -P format=unaligned -c 'show hba_file';
       - name: create database
         run: sudo -u postgres psql -c "CREATE DATABASE crashbot"
       - name: test
