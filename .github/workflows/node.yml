@@ -22,7 +22,7 @@ jobs:
       - name: start postgres
         run: sudo systemctl start postgresql.service
       - name: look for file
-        run: ls /var/lib/pgsql/data/
+        run: ls /var/lib
       - name: create database
         run: psql -U postgres -c "CREATE DATABASE crashbot"
       - name: test
