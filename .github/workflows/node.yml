@@ -26,9 +26,9 @@ jobs:
       - name: look for file
         run: sudo ls -la /var/lib/postgresql/12/main
       - name: print postgresql.auto.conf
-        run: cat /var/lib/postgresql/14/main/postgresql.auto.conf
+        run: sudo cat /var/lib/postgresql/14/main/postgresql.auto.conf
       - name: print postgresql.auto.conf
-        run: cat /var/lib/postgresql/12/main/postgresql.auto.conf
+        run: sudo cat /var/lib/postgresql/12/main/postgresql.auto.conf
       - name: create database
         run: psql
       - name: test
