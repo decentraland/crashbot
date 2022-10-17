@@ -23,5 +23,7 @@ jobs:
         run: sudo systemctl start postgresql.service
       - name: create database
         run: sudo -u postgres psql -c "CREATE DATABASE crashbot"
+      - name: show roles
+        run: sudo -u postgres psql -c "\du"
       - name: test
         run: npm run test
