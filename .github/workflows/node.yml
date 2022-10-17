@@ -23,8 +23,7 @@ jobs:
         run: sudo systemctl start postgresql.service
       - name: look for file
         run: psql -t -P format=unaligned -c 'show hba_file';
-        run: sudo cat /var/lib/postgresql/12/main/postgresql.auto.conf
       - name: create database
-        run: psql
+        run: sudo -u postgres psql -c "CREATE DATABASE crashbot"
       - name: test
         run: npm run test
