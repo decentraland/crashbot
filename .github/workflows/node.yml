@@ -22,7 +22,9 @@ jobs:
       - name: start postgres
         run: sudo systemctl start postgresql.service
       - name: look for file
-        run: sudo cat /var/lib/postgresql/14/main/pg_hba.conf
+        run: sudo ls /var/lib/postgresql/14/main
+      - name: look for file
+        run: sudo ls /var/lib/postgresql/12/main
       - name: create database
         run: psql
       - name: test
