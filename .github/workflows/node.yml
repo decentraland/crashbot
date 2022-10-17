@@ -22,8 +22,8 @@ jobs:
       - name: start postgres
         run: sudo systemctl start postgresql.service
       - name: look for file
-        run: ls /var/lib/postgresql
+        run: ls /var/lib/postgresql/14
       - name: create database
-        run: psql -U root -p root -c "CREATE DATABASE crashbot"
+        run: PGPASSWORD=root psql -U root -c "CREATE DATABASE crashbot"
       - name: test
         run: npm run test
