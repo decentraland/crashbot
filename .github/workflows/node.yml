@@ -22,9 +22,13 @@ jobs:
       - name: start postgres
         run: sudo systemctl start postgresql.service
       - name: look for file
-        run: sudo ls /var/lib/postgresql/14/main
+        run: sudo ls -la /var/lib/postgresql/14/main
       - name: look for file
-        run: sudo ls /var/lib/postgresql/12/main
+        run: sudo ls -la /var/lib/postgresql/12/main
+      - name: print postgresql.auto.conf
+        run: sudo ls -la /var/lib/postgresql/14/main/postgresql.auto.conf
+      - name: print postgresql.auto.conf
+        run: sudo ls -la /var/lib/postgresql/12/main/postgresql.auto.conf
       - name: create database
         run: psql
       - name: test
