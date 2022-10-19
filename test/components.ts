@@ -69,8 +69,8 @@ async function initComponents(): Promise<TestComponents> {
     // logs: logs,
     // server: server,
     ...components,
-    pg: createMock(),
-    bolt: createMock(),
+    pg: createMock<IPgComponent>(),
+    bolt: createMock<BoltComponent>(),
     localFetch: await createLocalFetchCompoment(config)
   }
 }
