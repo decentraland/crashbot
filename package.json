@@ -26,6 +26,7 @@
     "node-pg-migrate": "^6.2.2",
     "pg": "^8.8.0",
     "sql-template-strings": "^2.2.2",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "ts-auto-mock": "^3.6.2"
   }
 }
