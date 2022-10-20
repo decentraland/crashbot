@@ -49,7 +49,6 @@ export const GET_LAST_UPDATE_OF_ALL_INCIDENTS =
   SQL`SELECT 
     m.id,
     m.update_number,
-    m.modified_by,
     m.modified_at,
     m.reported_at,
     m.closed_at,
