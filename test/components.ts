@@ -53,20 +53,7 @@ function createMockBoltComponent(): BoltComponent {
 async function initComponents(): Promise<TestComponents> {
   const components = await originalInitComponents()
   const { config } = components
-  // const config = await createDotEnvConfigComponent({ path: [".env.default", ".env"] })
-  // const logs = await createLogComponent({})
-  // const pg = createMockPGComponent()
-  // const server = await createServerComponent<GlobalContext>(
-  //   { config, logs },
-  //   { cors: { maxAge: 36000 } }
-  // )
-  // const metrics = await createMetricsComponent(metricDeclarations, { server, config })
-  // const bolt = await createBoltComponent({ pg, config, logs })
   return {
-    // pg: pg,
-    // config: config,
-    // logs: logs,
-    // server: server,
     ...components,
     pg: createMockPGComponent(),
     bolt: createMockBoltComponent(),
