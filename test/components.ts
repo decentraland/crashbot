@@ -14,7 +14,6 @@ import { createServerComponent } from "@well-known-components/http-server"
 import { createMetricsComponent } from "@well-known-components/metrics"
 import { createBoltComponent } from "../src/ports/bolt"
 import { StringIndexed } from "@slack/bolt/dist/types/helpers"
-import { createMock } from 'ts-auto-mock';
 
 /**
  * Behaves like Jest "describe" function, used to describe a test for a
@@ -47,7 +46,7 @@ function createMockPGComponent(): IPgComponent {
 function createMockBoltComponent(): BoltComponent {
   return {
     ...createMockComponent(),
-    app: createMock()
+    getProfile: jest.fn() 
   }
 }
 
@@ -69,8 +68,8 @@ async function initComponents(): Promise<TestComponents> {
     // logs: logs,
     // server: server,
     ...components,
-    pg: createMock<IPgComponent>(),
-    bolt: createMock<BoltComponent>(),
+    pg: createMockPGComponent(),
+    bolt: createMockBoltComponent(),
     localFetch: await createLocalFetchCompoment(config)
   }
 }
