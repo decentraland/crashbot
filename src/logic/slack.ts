@@ -1,7 +1,7 @@
 import { App } from "@slack/bolt"
 import { StringIndexed } from "@slack/bolt/dist/types/helpers"
 import { GET_LAST_UPDATE_OF_OPEN_INCIDENTS } from "../queries"
-import { AppComponents, IncidentRow } from "../types"
+import { AppComponents, BoltComponent, IncidentRow } from "../types"
 
 const severityEmojis = {
   'sev-1': '1️⃣',
@@ -11,14 +11,11 @@ const severityEmojis = {
   'sev-5': '5️⃣'
 }
 
-export async function getRealNameFromAPI(app: App<StringIndexed>, userToken: string, userId: string | null | undefined) {
+export async function getRealNameFromAPI(bolt: BoltComponent, userId: string | null | undefined) {
   let username = 'Not assigned'
 
   if (userId) {
-    const response = await app.client.users.profile.get({
-      user: userId,
-      token: userToken
-    })
+    const response = await bolt.getProfile(userId)
 
     if (response.profile?.real_name)
       username = response.profile?.real_name as string

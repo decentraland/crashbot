@@ -1,5 +1,4 @@
 import { App, PlainTextOption } from "@slack/bolt"
-import { StringIndexed } from "@slack/bolt/dist/types/helpers"
 import type { IFetchComponent } from "@well-known-components/http-server"
 import type {
   IConfigComponent,
@@ -10,6 +9,7 @@ import type {
 } from "@well-known-components/interfaces"
 import { IPgComponent } from "@well-known-components/pg-component"
 import { metricDeclarations } from "./metrics"
+import { UsersProfileGetResponse } from '@slack/web-api'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -85,5 +85,5 @@ export type IncidentViewOptions = {
 }
 
 export type BoltComponent = IBaseComponent & {
-  app: App<StringIndexed>
+  getProfile(userId: string): Promise<UsersProfileGetResponse>
 }

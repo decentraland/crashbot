@@ -17,12 +17,10 @@ export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt"
     closed: [] as IncidentRow[]
   }
 
-  const userToken = await config.getString('SLACK_USER_TOKEN') ?? ''
-
   const incidents = queryResult.rows.map(async (incident) => {
-    incident.contact = await getRealNameFromAPI(bolt.app, userToken, incident.contact)
-    incident.point = await getRealNameFromAPI(bolt.app, userToken, incident.point)
-    incident.modified_by = await getRealNameFromAPI(bolt.app, userToken, incident.modified_by)
+    incident.contact = await getRealNameFromAPI(bolt, incident.contact)
+    incident.point = await getRealNameFromAPI(bolt, incident.point)
+    incident.modified_by = await getRealNameFromAPI(bolt, incident.modified_by)
     if (incident.status == 'open')
       response.open.push(incident)
     else

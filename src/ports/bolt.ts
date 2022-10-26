@@ -8,6 +8,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
   const { pg, config } = components
 
+  const userToken = await config.getString('SLACK_USER_TOKEN') ?? ''
+
   // Initialize app
   const app = new App({
     token: await config.getString('SLACK_BOT_TOKEN') ?? '',
@@ -321,7 +323,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
   app.action('status', ({ ack }) => ack())
 
   async function start() {
-    await app.start(process.env.PORT || 3000); 
+    await app.start(process.env.PORT || 3000);
     console.log('⚡️ Bolt app is running!');
   }
 
@@ -330,10 +332,17 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
     console.log('⚡️ Bolt app has stopped!')
   }
 
+  async function getProfile(userId: string) {
+    return app.client.users.profile.get({
+      user: userId,
+      token: userToken
+    })
+  }
+
   return {
     start,
     stop,
-    app
+    getProfile
   }
 }
 
