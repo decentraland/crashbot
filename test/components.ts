@@ -4,16 +4,9 @@
 import { createRunner, createLocalFetchCompoment } from "@well-known-components/test-helpers"
 
 import { main } from "../src/service"
-import { BoltComponent, GlobalContext, TestComponents } from "../src/types"
+import { BoltComponent, TestComponents } from "../src/types"
 import { initComponents as originalInitComponents } from "../src/components"
-import { IPgComponent, metricDeclarations } from "@well-known-components/pg-component"
-import { IBaseComponent } from "@well-known-components/interfaces"
-import { createDotEnvConfigComponent } from "@well-known-components/env-config-provider"
-import { createLogComponent } from "@well-known-components/logger"
-import { createServerComponent } from "@well-known-components/http-server"
-import { createMetricsComponent } from "@well-known-components/metrics"
-import { createBoltComponent } from "../src/ports/bolt"
-import { StringIndexed } from "@slack/bolt/dist/types/helpers"
+import { IPgComponent } from "@well-known-components/pg-component"
 
 /**
  * Behaves like Jest "describe" function, used to describe a test for a
@@ -34,7 +27,7 @@ function createMockComponent() {
   }
 }
 
-function createMockPGComponent(): IPgComponent {
+export function createMockPGComponent(): IPgComponent {
   return {
     ...createMockComponent(),
     getPool: jest.fn(),
@@ -43,7 +36,7 @@ function createMockPGComponent(): IPgComponent {
   }
 }
 
-function createMockBoltComponent(): BoltComponent {
+export function createMockBoltComponent(): BoltComponent {
   return {
     ...createMockComponent(),
     getProfile: jest.fn() 

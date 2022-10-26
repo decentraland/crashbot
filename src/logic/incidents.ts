@@ -4,9 +4,9 @@ import { getRealNameFromAPI } from "./slack"
 
 
 
-export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt" | "config">) {
+export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt">) {
 
-  const { pg, bolt, config } = components
+  const { pg, bolt } = components
 
   // Get all incidents
   const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_ALL_INCIDENTS)
@@ -40,7 +40,7 @@ export async function getIncidents(components: Pick<AppComponents, "pg" | "bolt"
     return severity1 - severity2
   })
 
-  // Sort closed incidents by report date
+  // Sort closed incidents by report date, descending
   response.closed.sort((incident1: IncidentRow, incident2: IncidentRow) => {
     return incident2.reported_at.getTime() - incident1.reported_at.getTime()
   })
