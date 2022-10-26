@@ -38,7 +38,7 @@ describe("slack-unit", () => {
     })
   })
 
-  describe("updateChannelTopic", () => {
-    it("must set ")
-  })
+  // describe("updateChannelTopic", () => {
+  //   it("must set ")
+  // })
 })
