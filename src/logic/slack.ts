@@ -1,5 +1,7 @@
 import { App } from "@slack/bolt"
 import { StringIndexed } from "@slack/bolt/dist/types/helpers"
+import { IDatabase } from "@well-known-components/interfaces"
+import { DatabaseError } from "pg"
 import { GET_LAST_UPDATE_OF_OPEN_INCIDENTS } from "../queries"
 import { AppComponents, BoltComponent, IncidentRow } from "../types"
 
@@ -30,41 +32,38 @@ export function getusername(userId: string | null | undefined) {
   return 'Not assigned'
 }
 
-export async function updateChannelTopic(components: Pick<AppComponents, "pg" | "config" | "logs" >, app: App<StringIndexed>) {
-  const { pg, logs, config } = components
+export async function updateChannelTopic(components: Pick<AppComponents, "pg" | "config" | "logs" | "bolt" >) {
+  const { pg, logs, config, bolt } = components
 
   try {
     // Get open incidents
     const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_OPEN_INCIDENTS)
     
     // Build channel topic
-    let topic = ''
-    if (queryResult.rowCount > 0) {
-      queryResult.rows.forEach((incident) => {
-        const incidentInfo = `${severityEmojis[incident.severity]} DCL-${incident.id} ${incident.title} ~ ${incident.description}`
-        topic += `${sliceIncidentInfo(incidentInfo, queryResult.rowCount)}\n`
-      })
-    } else {
-      topic = ':white_check_mark: All systems operational. Please use one thread per incident'
-    }
-
-    // Get bot token
-    const botToken = await config.getString('SLACK_BOT_TOKEN') ?? ''
+    let topic = buildTopic(queryResult)
 
     // Get channel's id
     const channelId = await config.getString('CRASH_CHANNEL_ID') ?? ''
 
     // Set topic to channel
-    await app.client.conversations.setTopic({
-      token: botToken,
-      channel: channelId,
-      topic: topic
-    })
-
+    bolt.setTopic(channelId, topic)
   } catch(error) {
     logs.getLogger('slack').error("Error while trying to update the channel's topic")
     console.error(error)
   }
+}
+
+function buildTopic(queryResult: IDatabase.IQueryResult<IncidentRow>) {
+  let topic = ''
+  if (queryResult.rowCount > 0) {
+    queryResult.rows.forEach((incident) => {
+      const incidentInfo = `${severityEmojis[incident.severity]} DCL-${incident.id} ${incident.title} ~ ${incident.description}`
+      topic += `${sliceIncidentInfo(incidentInfo, queryResult.rowCount)}\n`
+    })
+  } else {
+    topic = ':white_check_mark: All systems operational. Please use one thread per incident'
+  }
+  return topic
 }
 
 /* 

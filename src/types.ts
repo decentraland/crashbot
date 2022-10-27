@@ -85,5 +85,6 @@ export type IncidentViewOptions = {
 }
 
 export type BoltComponent = IBaseComponent & {
-  getProfile(userId: string): Promise<UsersProfileGetResponse>
+  getProfile(userId: string): Promise<UsersProfileGetResponse>,
+  setTopic(channelId: string, topic: string): Promise<void>
 }

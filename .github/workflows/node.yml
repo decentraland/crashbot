@@ -17,5 +17,13 @@ jobs:
         run: npm ci
       - name: build
         run: npm run build
+      - name: install postgres
+        run: sudo apt install postgresql
+      - name: start postgres
+        run: sudo systemctl start postgresql.service
+      - name: create database
+        run: sudo -u postgres psql -c "CREATE DATABASE crashbot"
+      - name: show roles
+        run: sudo -u postgres psql -c "\du"
       - name: test
         run: npm run test
