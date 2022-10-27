@@ -1,7 +1,4 @@
-import { App } from "@slack/bolt"
-import { StringIndexed } from "@slack/bolt/dist/types/helpers"
 import { IDatabase } from "@well-known-components/interfaces"
-import { DatabaseError } from "pg"
 import { GET_LAST_UPDATE_OF_OPEN_INCIDENTS } from "../queries"
 import { AppComponents, BoltComponent, IncidentRow } from "../types"
 
