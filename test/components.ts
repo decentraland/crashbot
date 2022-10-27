@@ -27,7 +27,7 @@ function createMockComponent() {
   }
 }
 
-export function createMockPGComponent(): IPgComponent {
+export function createMockPgComponent(): IPgComponent {
   return {
     ...createMockComponent(),
     getPool: jest.fn(),
@@ -39,7 +39,8 @@ export function createMockPGComponent(): IPgComponent {
 export function createMockBoltComponent(): BoltComponent {
   return {
     ...createMockComponent(),
-    getProfile: jest.fn() 
+    getProfile: jest.fn(),
+    setTopic: jest.fn()
   }
 }
 
@@ -48,8 +49,26 @@ async function initComponents(): Promise<TestComponents> {
   const { config } = components
   return {
     ...components,
-    pg: createMockPGComponent(),
+    pg: createMockPgComponent(),
     bolt: createMockBoltComponent(),
     localFetch: await createLocalFetchCompoment(config)
+  }
+}
+
+export function buildTemplateIncident() {
+  return {
+    id: 0,
+    update_number: 3,
+    modified_by: "",
+    modified_at: undefined,
+    reported_at: undefined,
+    closed_at: undefined,
+    status: "open",
+    severity: "sev-1",
+    title: "",
+    description: "",
+    point: "",
+    contact: "",
+    rca_link: ""
   }
 }

@@ -1,7 +1,7 @@
 import sinon from "sinon"
 import { getEmoji, getIncidents } from "../../src/logic/incidents"
 import { IncidentRow } from "../../src/types"
-import { createMockBoltComponent, createMockPGComponent } from "../components"
+import { buildTemplateIncident, createMockBoltComponent, createMockPgComponent } from "../components"
 
 describe("incidents-unit", () => {
   describe("getEmoji", () => {
@@ -65,18 +65,18 @@ describe("incidents-unit", () => {
 
   describe("getIncidents", () => {
     it("must return no incident if database is empty", async () => {
-      const pg = createMockPGComponent()
+      const pg = createMockPgComponent()
       const bolt = createMockBoltComponent()
       pg.query = sinon.stub().resolves({
         rows: [],
-        rowsCount: 0
+        rowCount: 0
       })
       const result = await getIncidents({ pg, bolt })
       expect(result).toEqual({open: [], closed: []})
     })
 
     it("must return closed incidents sorted by descending report date", async () => {
-      const pg = createMockPGComponent()
+      const pg = createMockPgComponent()
       const bolt = createMockBoltComponent()
       const incident1 = {
         ...buildTemplateIncident(),
@@ -99,14 +99,14 @@ describe("incidents-unit", () => {
           incident2,
           incident3
         ],
-        rowsCount: 3
+        rowCount: 3
       })
       const result = await getIncidents({ pg, bolt })
       expect(result).toEqual({open: [], closed: [incident3, incident1, incident2]})
     })
 
     it("must return open incidents sorted by descending severity and ascending report date if severities match", async () => {
-      const pg = createMockPGComponent()
+      const pg = createMockPgComponent()
       const bolt = createMockBoltComponent()
       const incident1 = {
         ...buildTemplateIncident(),
@@ -130,14 +130,14 @@ describe("incidents-unit", () => {
           incident2,
           incident3
         ],
-        rowsCount: 3
+        rowCount: 3
       })
       const result = await getIncidents({ pg, bolt })
       expect(result).toEqual({open: [incident2, incident3, incident1], closed: []})
     })
 
     it("must fill point, contact and modified_by with real names", async () => {
-      const pg = createMockPGComponent()
+      const pg = createMockPgComponent()
       const bolt = createMockBoltComponent()
       const incident1 = {
         ...buildTemplateIncident(),
@@ -162,7 +162,7 @@ describe("incidents-unit", () => {
           incident1,
           incident2
         ],
-        rowsCount: 3
+        rowCount: 3
       })
       bolt.getProfile = sinon.stub()
         .withArgs("userId1").resolves({ profile: { real_name: "username1" } })
@@ -174,22 +174,3 @@ describe("incidents-unit", () => {
     })
   })
 })
-
-function buildTemplateIncident() {
-  return {
-    id: 0,
-    update_number: 3,
-    modified_by: "",
-    modified_at: undefined,
-    reported_at: undefined,
-    closed_at: undefined,
-    status: "open",
-    severity: "sev-1",
-    title: "",
-    description: "",
-    point: "",
-    contact: "",
-    rca_link: ""
-  }
-}
-
