@@ -9,10 +9,11 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
   const { pg, config } = components
 
   const userToken = await config.getString('SLACK_USER_TOKEN') ?? ''
+  const botToken = await config.getString('SLACK_BOT_TOKEN') ?? ''
 
   // Initialize app
   const app = new App({
-    token: await config.getString('SLACK_BOT_TOKEN') ?? '',
+    token: botToken,
     signingSecret: await config.getString('SLACK_SIGNING_SECRET') ?? '',
     socketMode: true,
     appToken: await config.getString('SLACK_APP_TOKEN') ?? ''
@@ -104,7 +105,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       });
 
       // Update channel topic
-      updateChannelTopic(components, app)
+      updateChannelTopic({ ...components, bolt })
     }
     catch (error) {
       logger.error(error);
@@ -304,7 +305,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       });
 
       // Update channel topic
-      updateChannelTopic(components, app)
+      updateChannelTopic({ ...components, bolt })
     }
     catch (error) {
       logger.error(error);
@@ -339,14 +340,23 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
     })
   }
 
-  return {
+  async function setTopic(channelId: string, topic: string) {
+    await app.client.conversations.setTopic({
+      token: botToken,
+      channel: channelId,
+      topic: topic
+    })
+  }
+
+  const bolt = {
     start,
     stop,
-    getProfile
+    getProfile,
+    setTopic
   }
+
+  return bolt
 }
-
-
 
 const severitiesOptions = {
   'sev-1': {

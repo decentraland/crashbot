@@ -32,8 +32,8 @@ export function getusername(userId: string | null | undefined) {
   return 'Not assigned'
 }
 
-export async function updateChannelTopic(components: Pick<AppComponents, "pg" | "config" | "logs" >, app: App<StringIndexed>) {
-  const { pg, logs, config } = components
+export async function updateChannelTopic(components: Pick<AppComponents, "pg" | "config" | "logs" | "bolt" >) {
+  const { pg, logs, config, bolt } = components
 
   try {
     // Get open incidents
@@ -42,19 +42,11 @@ export async function updateChannelTopic(components: Pick<AppComponents, "pg" | 
     // Build channel topic
     let topic = buildTopic(queryResult)
 
-    // Get bot token
-    const botToken = await config.getString('SLACK_BOT_TOKEN') ?? ''
-
     // Get channel's id
     const channelId = await config.getString('CRASH_CHANNEL_ID') ?? ''
 
     // Set topic to channel
-    await app.client.conversations.setTopic({
-      token: botToken,
-      channel: channelId,
-      topic: topic
-    })
-
+    bolt.setTopic(channelId, topic)
   } catch(error) {
     logs.getLogger('slack').error("Error while trying to update the channel's topic")
     console.error(error)
