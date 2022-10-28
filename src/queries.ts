@@ -37,7 +37,9 @@ export const GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS =
     m.id,
     m.update_number,
     m.status, 
-    m.title
+    m.title,
+    m.reported_at,
+    m.severity
   FROM (
     SELECT id, MAX(update_number) AS last
     FROM incidents
@@ -77,7 +79,8 @@ export const GET_LAST_UPDATE_OF_OPEN_INCIDENTS =
     m.update_number,
     m.title,
     m.severity,
-    m.description
+    m.description,
+    m.reported_at
   FROM (
     SELECT id, MAX(update_number) AS last
     FROM incidents

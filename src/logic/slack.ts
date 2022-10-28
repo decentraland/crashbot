@@ -1,6 +1,7 @@
 import { IDatabase } from "@well-known-components/interfaces"
 import { GET_LAST_UPDATE_OF_OPEN_INCIDENTS } from "../queries"
 import { AppComponents, BoltComponent, IncidentRow } from "../types"
+import { compareBySeverity } from "./incidents"
 
 const severityEmojis = {
   'sev-1': '1️⃣',
@@ -53,7 +54,7 @@ export async function updateChannelTopic(components: Pick<AppComponents, "pg" | 
 function buildTopic(queryResult: IDatabase.IQueryResult<IncidentRow>) {
   let topic = ''
   if (queryResult.rowCount > 0) {
-    queryResult.rows.forEach((incident) => {
+    queryResult.rows.sort(compareBySeverity).forEach((incident) => {
       const incidentInfo = `${severityEmojis[incident.severity]} DCL-${incident.id} ${incident.title} ~ ${incident.description}`
       topic += `${sliceIncidentInfo(incidentInfo, queryResult.rowCount)}\n`
     })
