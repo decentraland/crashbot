@@ -88,7 +88,7 @@ describe("slack-unit", () => {
       expect(components.bolt.setTopic).toHaveBeenCalledWith('', '2️⃣ DCL-0 Incident title ~ Incident description\n')
     })
 
-    it("must set the channel topic to explain every incident details",async () => {
+    it("must set the channel topic to explain every incident details, ordered by severity",async () => {
       const components = {
         config: await createDotEnvConfigComponent({ path: [] }),
         logs: await createLogComponent({}),
@@ -119,7 +119,7 @@ describe("slack-unit", () => {
       await updateChannelTopic(components)
 
       expect(query.calledOnce).toBe(true)
-      expect(components.bolt.setTopic).toHaveBeenCalledWith('', '2️⃣ DCL-0 Incident title ~ Incident description\n1️⃣ DCL-1 Another incident title ~ Another incident description\n')
+      expect(components.bolt.setTopic).toHaveBeenCalledWith('', '1️⃣ DCL-1 Another incident title ~ Another incident description\n2️⃣ DCL-0 Incident title ~ Incident description\n')
     })
 
     it("must crop each incident details with ' ...' if necessary when topic surpass the 250 chars",async () => {
@@ -167,7 +167,7 @@ describe("slack-unit", () => {
       await updateChannelTopic(components)
 
       expect(query.calledOnce).toBe(true)
-      expect(components.bolt.setTopic).toHaveBeenCalledWith('', '2️⃣ DCL-0 Incident title ~ Incident description\n1️⃣ DCL-1 Another incident title ~ Another incident desc ...\n3️⃣ DCL-2 Yet another incident title ~ A loooooooooooooo ...\n5️⃣ DCL-3 More incident title ~ Another description\n')
+      expect(components.bolt.setTopic).toHaveBeenCalledWith('', '1️⃣ DCL-1 Another incident title ~ Another incident desc ...\n2️⃣ DCL-0 Incident title ~ Incident description\n3️⃣ DCL-2 Yet another incident title ~ A loooooooooooooo ...\n5️⃣ DCL-3 More incident title ~ Another description\n')
     })
   })
 })
