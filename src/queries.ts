@@ -6,7 +6,7 @@ export function CREATE_INCIDENT(user: string,
   description: string | undefined | null,
   point: string | undefined | null,
   contact: string | undefined | null,
-  reportedAt: string
+  reportedAt: string | null
 ): SQLStatement {
   return SQL`INSERT INTO incidents(
     update_number,
@@ -95,7 +95,7 @@ export function UPDATE_INCIDENT(
   description: string | undefined | null,
   point: string | undefined | null,
   contact: string | undefined | null,
-  reportedAt: string,
+  reportedAt: string | null,
   status: string | undefined,
   closedAt: string | null,
   rcaLink: string | null | undefined

@@ -74,8 +74,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       const user = body['user']['id'];
 
       // Build reported_at
-      const reportedAt = "'" + reportDate + " " + reportTime + ":00'"
-      // const reportedAt = "'2022-09-26 10:18:00.000'"
+      const reportedAt = buildDateAndTime(reportDate, reportTime)
 
       // Save to DB
       const queryResult = await pg.query(CREATE_INCIDENT(user, severity, title, description, point, contact, reportedAt))
@@ -237,8 +236,8 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       const severity = values['severity'].severity.selected_option
       const reportDate = values['report_date'].report_date.selected_date
       const reportTime = values['report_time'].report_time.selected_time
-      const resolutionDate = values['resolution_date'].resolution_date.selected_date
-      const resolutionTime = values['resolution_time'].resolution_time.selected_time
+      let resolutionDate = values['resolution_date'].resolution_date.selected_date
+      let resolutionTime = values['resolution_time'].resolution_time.selected_time
       const point = values['point'].point.selected_user
       const contact = values['contact'].contact.selected_user
       const title = values['title'].title.value
@@ -252,12 +251,27 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
 
       const user = body['user']['id'];
 
-      // Build dates
-      const reportedAt = "'" + reportDate + " " + reportTime + ":00'"
-      const closedAt = (resolutionDate && resolutionTime) ? "'" + resolutionDate + " " + resolutionTime + ":00'" : null
+      // Build report date
+      const reportedAt = buildDateAndTime(reportDate, reportTime)
+
+      // Build closed date. Use now as default closed date if the incident is being closed without a date
+      let closedAt
+      if (status?.value === "closed") {
+        const now = new Date()
+        const options:Intl.DateTimeFormatOptions = {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit'
+        }
+        if (!resolutionDate)
+          resolutionDate = now.toISOString().split('T')[0]
+        if (! resolutionTime)
+          resolutionTime = new Intl.DateTimeFormat('default', options).format(now)
+      }
+      closedAt = buildDateAndTime(resolutionDate, resolutionTime)
 
       // Save to DB
-      const queryResult = await pg.query(
+      await pg.query(
         UPDATE_INCIDENT(
           selectedIncident.id,
           selectedIncident.update_number + 1,
@@ -703,4 +717,10 @@ function getIncidentView(options: IncidentViewOptions): View {
   view.private_metadata
 
   return view
+}
+
+function buildDateAndTime(date: string | null | undefined, time: string | null | undefined) {
+  if (date && time)
+    return "'" + date + " " + time + ":00'"
+  return null
 }
