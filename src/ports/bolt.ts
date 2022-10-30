@@ -1,6 +1,6 @@
 import { App, BlockAction, Datepicker, PlainTextInput, PlainTextOption, SectionBlock, StaticSelect, StaticSelectAction, Timepicker, UsersSelect, View } from '@slack/bolt';
 import { AppComponents, BoltComponent, IncidentRow, IncidentViewOptions } from "../types";
-import { getEmoji } from "../logic/incidents";
+import { compareByDate, compareBySeverity, getEmoji } from "../logic/incidents";
 import { getusername, updateChannelTopic } from '../logic/slack';
 import { CREATE_INCIDENT, GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS, GET_LAST_UPDATE_OF_SELECTED_INCIDENT, UPDATE_INCIDENT } from '../queries';
 
@@ -121,9 +121,27 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       // Get all incidents
       const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS)
 
+      // Separate between open, closed and invalid
+      const open: IncidentRow[] = []
+      const closed: IncidentRow[] = []
+      const invalid: IncidentRow[] = []
+      queryResult.rows.forEach( (incident: IncidentRow) => {
+        if (incident.status === "open")
+        open.push(incident)
+        else if (incident.status === "closed")
+        closed.push(incident)
+        else
+          invalid.push(incident)
+      })
+  
+      // Sort them individually
+      open.sort(compareBySeverity)
+      closed.sort(compareByDate)
+      invalid.sort(compareByDate)
+
       // Build options for the incidents menu
       const loadedIncidentsOptions: PlainTextOption[] = []
-      queryResult.rows.forEach( (incident: IncidentRow) => {
+      open.concat(closed).concat(invalid).forEach( (incident: IncidentRow) => {
         loadedIncidentsOptions.push({
           text: {
             type: 'plain_text',
