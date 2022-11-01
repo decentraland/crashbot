@@ -246,9 +246,6 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
     // Acknowledge the view_submission request
     await ack();
 
-    console.log(view)
-    console.log(view.state)
-    console.log(view.state.values)
     try {
       // Get data from modal
       const values = view['state']['values'];
@@ -256,9 +253,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       const reportDateTimeObj = values['report_date_time'].report_date_time as { type: string, selected_date_time: number } 
       const reportTimestamp = reportDateTimeObj.selected_date_time * 1000
       const resolutionDateTimeObj = values['resolution_date_time'].resolution_date_time as { type: string, selected_date_time: number } 
-      console.log(resolutionDateTimeObj)
       let resolutionTimestamp = resolutionDateTimeObj.selected_date_time * 1000
-      console.log(resolutionTimestamp)
       const point = values['point'].point.selected_user
       const contact = values['contact'].contact.selected_user
       const title = values['title'].title.value
@@ -270,13 +265,11 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
       const metadata = JSON.parse(view.private_metadata)
       const selectedIncident = metadata.selectedIncident as IncidentRow
 
-      console.log('llega1')
-
       const user = body['user']['id'];
 
       // Build report date
       const reportedAt = buildDateAndTime(reportTimestamp)
-      console.log('llega2')
+
       // Build closed date. Use now as default closed date if the incident is being closed without a date
       let closedAt
       if (status?.value === "closed" && !resolutionTimestamp)
