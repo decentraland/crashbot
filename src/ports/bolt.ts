@@ -585,12 +585,12 @@ function getIncidentView(options: IncidentViewOptions): View {
 
   // Add point if not null
   if (options.point) {
-    ((view.blocks[3] as SectionBlock).accessory as UsersSelect).initial_user = options.point
+    ((view.blocks[2] as SectionBlock).accessory as UsersSelect).initial_user = options.point
   }
 
   // Add contact if not null
   if (options.contact) {
-    ((view.blocks[4] as SectionBlock).accessory as UsersSelect).initial_user = options.contact
+    ((view.blocks[3] as SectionBlock).accessory as UsersSelect).initial_user = options.contact
   }
 
   // Add fields when updating
@@ -616,7 +616,7 @@ function getIncidentView(options: IncidentViewOptions): View {
       resolutionDateTimeBlock.element.initial_date_time = Math.floor(new Date(options.resolutionDate).getTime() / 1000)
     
     // Add resolution date & time block to view (after report date & time)
-    view.blocks.splice(3, 0, resolutionDateTimeBlock)
+    view.blocks.splice(2, 0, resolutionDateTimeBlock)
   
     // Status
     const statusBlock = {
