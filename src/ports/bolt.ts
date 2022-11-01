@@ -349,47 +349,7 @@ export async function createBoltComponent(components: Pick<AppComponents, 'pg' |
   app.action('contact', ({ ack }) => ack())
   app.action('resolution_date', ({ ack }) => ack())
   app.action('resolution_time', ({ ack }) => ack())
-
-  // Update modal when status changes
-  app.action('status', async ({ ack, body, logger, client }) => {
-    await ack()
-
-    try {
-      // Get data from body
-      const blockActionBody = body as BlockAction
-      const action = blockActionBody.actions[0] as StaticSelectAction;
-      const selectedStatus = action.selected_option.value
-      const view = blockActionBody.view;
-      const resolutionDateTimeBlock = view?.blocks[3] as InputBlock
-
-      // Make resolution date & time mandatory if incident is closed
-      if (selectedStatus === "closed")
-        resolutionDateTimeBlock.optional = false
-      else 
-        resolutionDateTimeBlock.optional = true
-
-      // Update the modal
-      await client.views.update({
-        view_id: view?.id,
-        hash: view?.hash,
-        view: {
-          type: "modal",
-          callback_id: view?.callback_id,
-          title: {
-            type: 'plain_text',
-            text: view?.title.text ?? ''
-          },
-          blocks: view?.blocks ?? [],
-          submit: {
-            type: 'plain_text',
-            text: view?.submit?.text ?? ''
-          }
-        }
-      });
-    } catch (error) {
-      logger.error(error)
-    }
-  })
+  app.action('status', ({ ack }) => ack())
 
   async function start() {
     await app.start(process.env.PORT || 3000);
