@@ -4,14 +4,7 @@ FROM node:lts-alpine as builderenv
 
 WORKDIR /app
 
-# some packages require a build step
-RUN apt-get update
-RUN apt-get -y -qq install python-setuptools python-dev build-essential
-
-# We use Tini to handle signals and PID1 (https://github.com/krallin/tini, read why here https://github.com/krallin/tini/issues/8)
-ENV TINI_VERSION v0.19.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
+RUN apk add --no-cache git
 
 # install dependencies
 COPY package.json /app/package.json
@@ -33,9 +26,12 @@ FROM node:lts-alpine
 # NODE_ENV is used to configure some runtime options, like JSON logger
 ENV NODE_ENV production
 
+RUN apk update && apk upgrade
+RUN apk add --no-cache tini
+
 WORKDIR /app
 COPY --from=builderenv /app /app
-COPY --from=builderenv /tini /tini
+
 # Please _DO NOT_ use a custom ENTRYPOINT because it may prevent signals
 # (i.e. SIGTERM) to reach the service
 # Read more here: https://aws.amazon.com/blogs/containers/graceful-shutdowns-with-ecs/
