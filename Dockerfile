@@ -36,6 +36,6 @@ COPY --from=builderenv /app /app
 # (i.e. SIGTERM) to reach the service
 # Read more here: https://aws.amazon.com/blogs/containers/graceful-shutdowns-with-ecs/
 #            and: https://www.ctl.io/developers/blog/post/gracefully-stopping-docker-containers/
-ENTRYPOINT ["/tini", "--"]
+ENTRYPOINT ["/sbin/tini", "--"]
 # Run the program under Tini
 CMD [ "/usr/local/bin/node", "--trace-warnings", "--abort-on-uncaught-exception", "--unhandled-rejections=strict", "dist/index.js" ]
