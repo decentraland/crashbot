@@ -599,7 +599,7 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.2.tgz#5981a8db18b56ba38ef0efb7d995b12aa7b51918"
   integrity sha512-sXXKG+uL9IrKqViTtao2Ws6dy0znu9sOaP1di/jKGW1M6VssO8vlpXCQcpZ+jisQ1tTFAC5Jo/EOzFbggBagFQ==
 
-"@slack/bolt@^3.12.1":
+"@slack/bolt@^3.15.0":
   version "3.15.0"
   resolved "https://registry.yarnpkg.com/@slack/bolt/-/bolt-3.15.0.tgz#2e464e0e8e11f2b9e6ad855e434ca4d08d2a68a8"
   integrity sha512-B+N6oaEb1BuXXzP9eb0Yc5J/vLII+ZNYgKewia3+lAoiWTSbQ3cto6SCmglMnihsmZM6wjZUrKEK9Hg0+l90QQ==
@@ -949,7 +949,7 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@well-known-components/env-config-provider@^1.1.1":
+"@well-known-components/env-config-provider@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@well-known-components/env-config-provider/-/env-config-provider-1.2.0.tgz#bd170c0af24cd8a34ebff23245fe53466db7f8be"
   integrity sha512-QYDL9Uk1zEs5Q4ymgeZo1GVzuHe9Pp/jOLPRIbhwtPOCQ2Bd9yIlUWiFoC36JpcUSIlQ7Fzh8x21v2U95q5/+Q==
