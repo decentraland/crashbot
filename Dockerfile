@@ -1,6 +1,6 @@
 ARG RUN
 
-FROM node:lts as builderenv
+FROM node:lts-alpine as builderenv
 
 WORKDIR /app
 
@@ -15,20 +15,20 @@ RUN chmod +x /tini
 
 # install dependencies
 COPY package.json /app/package.json
-COPY package-lock.json /app/package-lock.json
-RUN npm ci
+COPY yarn.lock /app/yarn.lock
+RUN yarn install --frozen-lockfile
 
 # build the app
 COPY . /app
-RUN npm run build
-RUN npm run test
+RUN yarn build
+RUN yarn test
 
 # remove devDependencies, keep only used dependencies
-RUN npm ci --only=production
+RUN yarn install --prod --frozen-lockfile
 
 ########################## END OF BUILD STAGE ##########################
 
-FROM node:lts
+FROM node:lts-alpine
 
 # NODE_ENV is used to configure some runtime options, like JSON logger
 ENV NODE_ENV production
