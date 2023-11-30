@@ -1,14 +1,11 @@
 import {
   App,
   BlockAction,
-  Datepicker,
-  InputBlock,
   PlainTextInput,
   PlainTextOption,
   SectionBlock,
   StaticSelect,
   StaticSelectAction,
-  Timepicker,
   UsersSelect,
   View
 } from '@slack/bolt'
@@ -33,9 +30,9 @@ export async function createBoltComponent(
   // Initialize app
   const app = new App({
     token: botToken,
-    signingSecret: (await config.getString('SLACK_SIGNING_SECRET')) ?? '',
+    signingSecret: await config.requireString('SLACK_SIGNING_SECRET'),
     socketMode: true,
-    appToken: (await config.getString('SLACK_APP_TOKEN')) ?? ''
+    appToken: await config.requireString('SLACK_APP_TOKEN')
   })
 
   // Commands are retrieved from environment for local testing
@@ -485,7 +482,7 @@ const statusOptions = {
 }
 
 function getIncidentView(options: IncidentViewOptions): View {
-  const view = {
+  const view: View = {
     type: 'modal',
     // View identifier
     callback_id: options.callbackId,
@@ -601,7 +598,7 @@ function getIncidentView(options: IncidentViewOptions): View {
       type: 'plain_text',
       text: options.submitButtonText
     }
-  } as View
+  }
 
   // Add point if not null
   if (options.point) {
