@@ -169,7 +169,7 @@ export async function createBoltComponent(
           })
         })
 
-      console.log(queryResult.rowCount, loadedIncidentsOptions.length)
+      console.log(JSON.stringify(loadedIncidentsOptions))
 
       if (queryResult.rowCount > 0) {
         await client.views.open({
@@ -208,7 +208,7 @@ export async function createBoltComponent(
         })
       }
     } catch (error) {
-      logger.error(error)
+      logger.error(JSON.stringify(error))
     }
   })
 
