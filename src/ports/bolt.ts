@@ -169,6 +169,8 @@ export async function createBoltComponent(
           })
         })
 
+      console.log(queryResult.rowCount, loadedIncidentsOptions.length)
+
       if (queryResult.rowCount > 0) {
         await client.views.open({
           trigger_id: body.trigger_id,
