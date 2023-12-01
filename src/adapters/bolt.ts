@@ -17,7 +17,7 @@ import {
   GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS,
   GET_LAST_UPDATE_OF_SELECTED_INCIDENT,
   UPDATE_INCIDENT
-} from '../queries'
+} from '../logic/queries'
 
 export async function createBoltComponent(
   components: Pick<AppComponents, 'pg' | 'config' | 'logs'>

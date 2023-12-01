@@ -1,5 +1,5 @@
 import { IDatabase } from '@well-known-components/interfaces'
-import { GET_LAST_UPDATE_OF_OPEN_INCIDENTS } from '../queries'
+import { GET_LAST_UPDATE_OF_OPEN_INCIDENTS } from '../logic/queries'
 import { AppComponents, BoltComponent, IncidentRow } from '../types'
 import { compareBySeverity } from './incidents'
 

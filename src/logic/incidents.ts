@@ -1,4 +1,4 @@
-import { GET_LAST_UPDATE_OF_ALL_INCIDENTS } from '../queries'
+import { GET_LAST_UPDATE_OF_ALL_INCIDENTS } from '../logic/queries'
 import { AppComponents, IncidentRow } from '../types'
 import { getRealNameFromAPI } from './slack'
 
