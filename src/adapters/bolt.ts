@@ -66,7 +66,7 @@ export async function createBoltComponent(
       })
       logger.info(result)
     } catch (error) {
-      logger.error(error)
+      logger.error(JSON.stringify(error))
     }
   })
 
@@ -125,7 +125,7 @@ export async function createBoltComponent(
       // Update channel topic
       updateChannelTopic({ ...components, bolt })
     } catch (error) {
-      logger.error(error)
+      logger.error(JSON.stringify(error))
     }
   })
 
@@ -256,7 +256,7 @@ export async function createBoltComponent(
         view: newView
       })
     } catch (error) {
-      logger.error(error)
+      logger.error(JSON.stringify(error))
     }
   })
 
@@ -350,7 +350,7 @@ export async function createBoltComponent(
       // Update channel topic
       updateChannelTopic({ ...components, bolt })
     } catch (error) {
-      logger.error(error)
+      logger.error(JSON.stringify(error))
     }
   })
 

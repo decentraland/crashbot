@@ -4,7 +4,7 @@ import { createLogComponent } from '@well-known-components/logger'
 import { createMetricsComponent, instrumentHttpServerWithMetrics } from '@well-known-components/metrics'
 import { AppComponents, GlobalContext } from './types'
 import { metricDeclarations } from './metrics'
-import { createBoltComponent } from './ports/bolt'
+import { createBoltComponent } from './adapters/bolt'
 import { createPgComponent } from '@well-known-components/pg-component'
 import path from 'path'
 
