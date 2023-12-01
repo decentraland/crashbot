@@ -1,6 +1,7 @@
-import SQL, { SQLStatement } from "sql-template-strings";
+import SQL, { SQLStatement } from 'sql-template-strings'
 
-export function CREATE_INCIDENT(user: string,
+export function CREATE_INCIDENT(
+  user: string,
   severity: string | undefined,
   title: string | undefined | null,
   description: string | undefined | null,
@@ -32,8 +33,7 @@ export function CREATE_INCIDENT(user: string,
   RETURNING id`
 }
 
-export const GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS = 
-  SQL`SELECT 
+export const GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS = SQL`SELECT 
     m.id,
     m.update_number,
     m.status, 
@@ -47,8 +47,7 @@ export const GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS =
   ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number;
 `
 
-export const GET_LAST_UPDATE_OF_ALL_INCIDENTS = 
-  SQL`SELECT 
+export const GET_LAST_UPDATE_OF_ALL_INCIDENTS = SQL`SELECT 
     m.id,
     m.update_number,
     m.modified_at,
@@ -73,8 +72,7 @@ export function GET_LAST_UPDATE_OF_SELECTED_INCIDENT(selectedIncidentId: string)
   return SQL`SELECT * FROM incidents WHERE id = ${selectedIncidentId} ORDER BY update_number DESC LIMIT 1;`
 }
 
-export const GET_LAST_UPDATE_OF_OPEN_INCIDENTS = 
-  SQL`SELECT 
+export const GET_LAST_UPDATE_OF_OPEN_INCIDENTS = SQL`SELECT 
     m.id,
     m.update_number,
     m.title,
