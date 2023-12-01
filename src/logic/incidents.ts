@@ -18,8 +18,11 @@ export async function getIncidents(components: Pick<AppComponents, 'pg' | 'bolt'
     incident.contact = await getRealNameFromAPI(bolt, incident.contact)
     incident.point = await getRealNameFromAPI(bolt, incident.point)
     incident.modified_by = await getRealNameFromAPI(bolt, incident.modified_by)
-    if (incident.status == 'open') response.open.push(incident)
-    else response.closed.push(incident)
+    if (incident.status === 'open') {
+      response.open.push(incident)
+    } else {
+      response.closed.push(incident)
+    }
   })
   await Promise.all(incidents)
 
@@ -39,19 +42,21 @@ export function compareByDate(incident1: IncidentRow, incident2: IncidentRow) {
 
 // Ascending severity comparison
 export function compareBySeverity(incident1: IncidentRow, incident2: IncidentRow): number {
-  const severity1 = parseInt(incident1.severity.at(-1) ?? '0')
-  const severity2 = parseInt(incident2.severity.at(-1) ?? '0')
+  const severity1 = parseInt(incident1.severity.at(-1) ?? '0', 10)
+  const severity2 = parseInt(incident2.severity.at(-1) ?? '0', 10)
 
   // If the severity is matched, order by reported date, ascending
-  if (severity1 - severity2 == 0) return incident1.reported_at.getTime() - incident2.reported_at.getTime()
+  if (severity1 - severity2 === 0) {
+    return incident1.reported_at.getTime() - incident2.reported_at.getTime()
+  }
 
   return severity1 - severity2
 }
 
 export function getEmoji(incident: IncidentRow): string {
-  if (incident.status == 'closed') return '✅'
+  if (incident.status === 'closed') return '✅'
 
-  if (incident.status == 'open') return '🚨'
+  if (incident.status === 'open') return '🚨'
 
   // Emoji for invalid incidents
   return '🚫'

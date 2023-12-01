@@ -27,12 +27,17 @@ export function validate(
     const apiKeyFromHeader = context.request.headers.get('crashbot')
     const originFromHeader = context.request.headers.get('origin')
 
-    if (!apiKeyFromHeader) return notAllowedResponse('Not allowed. Missing API key.')
+    if (!apiKeyFromHeader) {
+      return notAllowedResponse('Not allowed. Missing API key.')
+    }
 
-    if (apiKeyFromHeader != apiKeyFromEnv)
+    if (apiKeyFromHeader !== apiKeyFromEnv) {
       return notAllowedResponse(`Not allowed. Invalid API key: ${apiKeyFromHeader}.`)
+    }
 
-    if (originFromHeader != allowedOrigin) return notAllowedResponse(`Origin not allowed: ${originFromHeader}.`)
+    if (originFromHeader !== allowedOrigin) {
+      return notAllowedResponse(`Origin not allowed: ${originFromHeader}.`)
+    }
 
     return next()
   }

@@ -1,4 +1,4 @@
-import { App, PlainTextOption } from '@slack/bolt'
+import { PlainTextOption } from '@slack/bolt'
 import type { IFetchComponent } from '@well-known-components/http-server'
 import type {
   IConfigComponent,

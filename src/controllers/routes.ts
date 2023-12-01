@@ -1,5 +1,4 @@
-import { FullHttpServerComponent, RoutedContext, Router } from '@well-known-components/http-server'
-import { IHttpServerComponent } from '@well-known-components/interfaces'
+import { Router } from '@well-known-components/http-server'
 import { validate } from '../logic/validation'
 import { GlobalContext } from '../types'
 import { listHandler } from './handlers/list-handler'

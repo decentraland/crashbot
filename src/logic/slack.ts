@@ -17,7 +17,9 @@ export async function getRealNameFromAPI(bolt: BoltComponent, userId: string | n
   if (userId) {
     const response = await bolt.getProfile(userId)
 
-    if (response.profile?.real_name) username = response.profile?.real_name as string
+    if (response.profile?.real_name) {
+      username = response.profile?.real_name
+    }
   }
   return username
 }
@@ -42,7 +44,7 @@ export async function updateChannelTopic(components: Pick<AppComponents, 'pg' | 
     const channelId = (await config.getString('CRASH_CHANNEL_ID')) ?? ''
 
     // Set topic to channel
-    bolt.setTopic(channelId, topic)
+    await bolt.setTopic(channelId, topic)
   } catch (error) {
     logs.getLogger('slack').error("Error while trying to update the channel's topic")
     console.error(error)

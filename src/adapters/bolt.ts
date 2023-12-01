@@ -123,7 +123,7 @@ export async function createBoltComponent(
       })
 
       // Update channel topic
-      updateChannelTopic({ ...components, bolt })
+      await updateChannelTopic({ ...components, bolt })
     } catch (error) {
       logger.error(JSON.stringify(error))
     }
@@ -296,10 +296,11 @@ export async function createBoltComponent(
       const reportedAt = buildDateAndTime(reportTimestamp)
 
       // Build closed date. Use now as default closed date if the incident is being closed without a date
-      let closedAt
-      if (status?.value === 'closed' && !resolutionTimestamp) resolutionTimestamp = new Date().getTime()
+      if (status?.value === 'closed' && !resolutionTimestamp) {
+        resolutionTimestamp = Date.now()
+      }
 
-      closedAt = buildDateAndTime(resolutionTimestamp)
+      const closedAt = buildDateAndTime(resolutionTimestamp)
 
       // Save to DB
       await pg.query(
@@ -348,7 +349,7 @@ export async function createBoltComponent(
       })
 
       // Update channel topic
-      updateChannelTopic({ ...components, bolt })
+      await updateChannelTopic({ ...components, bolt })
     } catch (error) {
       logger.error(JSON.stringify(error))
     }
@@ -614,7 +615,7 @@ function getIncidentView(options: IncidentViewOptions): View {
   }
 
   // Add fields when updating
-  if (options.callbackId == 'update') {
+  if (options.callbackId === 'update') {
     // Resolution date & time
     const resolutionDateTimeBlock = {
       type: 'input',
