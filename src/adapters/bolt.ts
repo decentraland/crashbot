@@ -160,7 +160,6 @@ export async function createBoltComponent(
         .concat(invalid)
         .forEach((incident: IncidentRow) => {
           const text = `${getEmoji(incident)} DCL-${incident.id} ${incident.title}`
-          console.log(text.length)
 
           loadedIncidentsOptions.push({
             text: {
