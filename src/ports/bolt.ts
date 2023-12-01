@@ -159,17 +159,18 @@ export async function createBoltComponent(
         .concat(closed)
         .concat(invalid)
         .forEach((incident: IncidentRow) => {
+          const text = `${getEmoji(incident)} DCL-${incident.id} ${incident.title}`
+          console.log(text.length)
+
           loadedIncidentsOptions.push({
             text: {
               type: 'plain_text',
-              text: `${getEmoji(incident)} DCL-${incident.id} ${incident.title}`,
+              text: text.substring(0, 76),
               emoji: true
             },
             value: incident.id.toString()
           })
         })
-
-      console.log(JSON.stringify(loadedIncidentsOptions))
 
       if (queryResult.rowCount > 0) {
         await client.views.open({
