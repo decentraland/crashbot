@@ -164,7 +164,7 @@ export async function createBoltComponent(
           loadedIncidentsOptions.push({
             text: {
               type: 'plain_text',
-              text: text.substring(0, 76),
+              text: text.substring(0, 75),
               emoji: true
             },
             value: incident.id.toString()
