@@ -12,7 +12,7 @@
   "devDependencies": {
     "@dcl/eslint-config": "^1.1.13",
     "@types/node": "^20.10.1",
-    "@well-known-components/test-helpers": "^1.5.4",
+    "@well-known-components/test-helpers": "^1.5.5",
     "typescript": "^5.3.2"
   },
   "prettier": {
