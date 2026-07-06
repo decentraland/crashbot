@@ -1,11 +1,11 @@
 import {
   App,
   BlockAction,
+  ExternalSelectAction,
   PlainTextInput,
   PlainTextOption,
   SectionBlock,
   StaticSelect,
-  StaticSelectAction,
   UsersSelect,
   View
 } from '@slack/bolt'
@@ -138,40 +138,10 @@ export async function createBoltComponent(
       // Get all incidents
       const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS)
 
-      // Separate between open, closed and invalid
-      const open: IncidentRow[] = []
-      const closed: IncidentRow[] = []
-      const invalid: IncidentRow[] = []
-      queryResult.rows.forEach((incident: IncidentRow) => {
-        if (incident.status === 'open') open.push(incident)
-        else if (incident.status === 'closed') closed.push(incident)
-        else invalid.push(incident)
-      })
-
-      // Sort them individually
-      open.sort(compareBySeverity)
-      closed.sort(compareByDate)
-      invalid.sort(compareByDate)
-
-      // Build options for the incidents menu
-      const loadedIncidentsOptions: PlainTextOption[] = []
-      open
-        .concat(closed)
-        .concat(invalid)
-        .forEach((incident: IncidentRow) => {
-          const text = `${getEmoji(incident)} DCL-${incident.id} ${incident.title}`
-
-          loadedIncidentsOptions.push({
-            text: {
-              type: 'plain_text',
-              text: text.substring(0, 75),
-              emoji: true
-            },
-            value: incident.id.toString()
-          })
-        })
-
       if (queryResult.rowCount > 0) {
+        // The incidents are loaded lazily through an external_select so we never hit
+        // Slack's 100-option limit on a static_select (the incident list keeps growing).
+        // Options are provided by the `loaded_incidents` app.options handler below.
         await client.views.open({
           trigger_id: body.trigger_id,
           view: {
@@ -188,8 +158,13 @@ export async function createBoltComponent(
                 elements: [
                   {
                     action_id: 'loaded_incidents',
-                    type: 'static_select',
-                    options: loadedIncidentsOptions
+                    type: 'external_select',
+                    placeholder: {
+                      type: 'plain_text',
+                      text: 'Select an incident'
+                    },
+                    // Load options as soon as the menu is opened (no typing required).
+                    min_query_length: 0
                   }
                 ]
               }
@@ -212,6 +187,26 @@ export async function createBoltComponent(
     }
   })
 
+  // Provide the options for the `loaded_incidents` external_select. Slack calls this
+  // as the user opens/types in the menu, so we filter server-side and cap the response
+  // at Slack's 100-option limit instead of trying to push every incident into the view.
+  app.options('loaded_incidents', async ({ options, ack, logger }) => {
+    try {
+      const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS)
+      const incidentsOptions = buildLoadedIncidentsOptions(queryResult.rows)
+
+      const query = (options.value ?? '').toLowerCase()
+      const matches = query
+        ? incidentsOptions.filter((option) => option.text.text.toLowerCase().includes(query))
+        : incidentsOptions
+
+      await ack({ options: matches.slice(0, MAX_SELECT_OPTIONS) })
+    } catch (error) {
+      logger.error(JSON.stringify(error))
+      await ack({ options: [] })
+    }
+  })
+
   app.action('loaded_incidents', async ({ ack, body, logger, client }) => {
     await ack()
 
@@ -219,8 +214,9 @@ export async function createBoltComponent(
       // Get data from body
       const blockActionBody = body as BlockAction
       const previousView = blockActionBody.view
-      const action = blockActionBody.actions[0] as StaticSelectAction
-      const selectedIncidentId = action.selected_option.value
+      const action = blockActionBody.actions[0] as ExternalSelectAction
+      const selectedIncidentId = action.selected_option?.value
+      if (!selectedIncidentId) return
 
       // Get last update for selected incident
       const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_SELECTED_INCIDENT(selectedIncidentId))
@@ -397,6 +393,42 @@ export async function createBoltComponent(
   }
 
   return bolt
+}
+
+// Slack rejects a select menu with more than 100 options.
+const MAX_SELECT_OPTIONS = 100
+
+// Turns incident rows into select options, ordered the way we want them surfaced:
+// open incidents first (by severity), then closed and invalid (by date).
+function buildLoadedIncidentsOptions(incidents: IncidentRow[]): PlainTextOption[] {
+  const open: IncidentRow[] = []
+  const closed: IncidentRow[] = []
+  const invalid: IncidentRow[] = []
+  incidents.forEach((incident: IncidentRow) => {
+    if (incident.status === 'open') open.push(incident)
+    else if (incident.status === 'closed') closed.push(incident)
+    else invalid.push(incident)
+  })
+
+  open.sort(compareBySeverity)
+  closed.sort(compareByDate)
+  invalid.sort(compareByDate)
+
+  return open
+    .concat(closed)
+    .concat(invalid)
+    .map((incident: IncidentRow) => {
+      const text = `${getEmoji(incident)} DCL-${incident.id} ${incident.title}`
+
+      return {
+        text: {
+          type: 'plain_text',
+          text: text.substring(0, 75),
+          emoji: true
+        },
+        value: incident.id.toString()
+      }
+    })
 }
 
 const severitiesOptions = {
