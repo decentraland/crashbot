@@ -47,7 +47,9 @@ export const GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS = SQL`SELECT
   ) t JOIN incidents m ON m.id = t.id AND t.last = m.update_number;
 `
 
-export const GET_LAST_UPDATE_OF_ALL_INCIDENTS = SQL`SELECT 
+export const EXISTS_ANY_INCIDENT = SQL`SELECT 1 FROM incidents LIMIT 1;`
+
+export const GET_LAST_UPDATE_OF_ALL_INCIDENTS = SQL`SELECT
     m.id,
     m.update_number,
     m.modified_at,

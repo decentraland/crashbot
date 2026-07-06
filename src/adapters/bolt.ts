@@ -14,6 +14,7 @@ import { compareByDate, compareBySeverity, getEmoji } from '../logic/incidents'
 import { getusername, updateChannelTopic } from '../logic/slack'
 import {
   CREATE_INCIDENT,
+  EXISTS_ANY_INCIDENT,
   GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS,
   GET_LAST_UPDATE_OF_SELECTED_INCIDENT,
   UPDATE_INCIDENT
@@ -135,8 +136,9 @@ export async function createBoltComponent(
     await ack()
 
     try {
-      // Get all incidents
-      const queryResult = await pg.query<IncidentRow>(GET_LAST_UPDATE_OF_ALL_INCIDENTS_FEW_COLUMNS)
+      // Only check whether there is at least one incident; the actual options are
+      // fetched lazily by the `loaded_incidents` app.options handler below.
+      const queryResult = await pg.query(EXISTS_ANY_INCIDENT)
 
       if (queryResult.rowCount > 0) {
         // The incidents are loaded lazily through an external_select so we never hit
@@ -400,7 +402,7 @@ const MAX_SELECT_OPTIONS = 100
 
 // Turns incident rows into select options, ordered the way we want them surfaced:
 // open incidents first (by severity), then closed and invalid (by date).
-function buildLoadedIncidentsOptions(incidents: IncidentRow[]): PlainTextOption[] {
+export function buildLoadedIncidentsOptions(incidents: IncidentRow[]): PlainTextOption[] {
   const open: IncidentRow[] = []
   const closed: IncidentRow[] = []
   const invalid: IncidentRow[] = []
